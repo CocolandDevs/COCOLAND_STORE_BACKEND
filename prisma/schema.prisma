@@ -12,3 +12,10 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+//este es un ejemplo de como se crea una tabla para la base de datos
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  name    String?
+}
