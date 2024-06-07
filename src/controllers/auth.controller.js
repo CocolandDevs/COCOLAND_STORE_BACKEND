@@ -7,6 +7,7 @@ export const getUsers = async () => {
     return users;
 }
 
+
 export const register = async (req,res) => {
     const { username, email, password } = req.body;
     try {
