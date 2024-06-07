@@ -1,0 +1,33 @@
+Esta carpeta es para validaciones de las rutas, es decir si necesitamos realizar alguna validación antes de ejecutar la función de nuestra ruta
+en esta carpeta deberá estar dicha validación en su respectivo archivo, o si esa validación es parecida a alguna existente se pone en el mismo archivo.
+
+tomaremos de ejemplo la validación de si el usuario esta logueado o tiene una sesión activa:
+
+para esta validación usaremos una librería llamada jsonwebtoken:
+https://www.npmjs.com/package/jsonwebtoken
+y usaremos una variable de entorno para poder validar el token con una llave secreta
+
+1.- importamos lo que necesitamos:
+    import jwt from 'jsonwebtoken';
+    const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
+
+2.- cómo esta validacion será utilizada en muchos archivos necesitamos exportar la validación:
+    export const authRequired
+
+3.- al res una validación de la ruta podemos obtener la request y podemos manejar una respuesta
+así también se agrega un parametro nuevo llamado "next" este parámetro es como decir si todo salió bien 
+avanza a la siguiente función.
+    export const authRequired = (req,res,next) =>{}
+
+4.-  realizamos la lógica que queremos validar:
+
+    const {access_token} = req.cookies;
+    if(!access_token) return res.status(401).json({message : "No se encontró un Token de acceso, por favor inicie sesión"});
+
+    jwt.verify(access_token,TOKEN_SECRET_KEY,(err,decoded) =>{
+        if(err) return res.status(401).json({message : "Token Inválido"});
+        req.user = decoded;
+    })
+
+5.- si la validación fue correcta avanzamos a la siguiente función:
+    next()

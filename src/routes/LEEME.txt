@@ -1,0 +1,17 @@
+es importante separar las rutas para mantener una mejor estructura en nuestro proyecto.
+para poder crear nuestras rutas usaremos express y su router.
+
+1.- Importamos el router:
+    import { Router } from "express";
+
+2.- creamos una variable que contenga el router para poder utilizarlo:
+    const router = Router();
+
+3.- es importante verificar si validaremos algo en nuestra ruta o si necesitamos realizar alguna validación
+para ello es importante mantener la estructura de las rutas la cual es la siguiente:
+    Nombre de la ruta + validaciones + función que realizará la ruta:
+
+    router.post("/register", validateschema(registerSchema) ,register);
+
+4.- cómo ultiumo paso necesitamos poder usar las rutas para ello lo exportaremos:
+    export default router;

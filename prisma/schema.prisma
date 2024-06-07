@@ -14,8 +14,30 @@ datasource db {
 }
 
 //este es un ejemplo de como se crea una tabla para la base de datos
-model User {
+model USUARIOS {
   id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String?
+  email   String   @unique @db.VarChar(255)
+  name    String?  @db.VarChar(100)
+  password String   @db.VarChar(255)
+}
+
+model PERFIL_USUARIO{
+  id Int @id @default(autoincrement())
+  id_usuario Int?
+  nombres String? @db.VarChar(100)
+  apellidos String? @db.VarChar(100)
+  genero String? @db.VarChar(50)
+  fecha_nacimiento DateTime?
+  telefono Int? 
+}
+
+model ROLES {
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(50)
+}
+
+model USUARIOS_ROLES {
+  id Int @id @default(autoincrement())
+  id_usuario Int
+  id_rol Int
 }
