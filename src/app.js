@@ -12,6 +12,6 @@ const App = express();
 App.use(morgan('dev')).use(express.json()).use(cookieParser()).use(cors());
 
 App.use('/api', authRoutes);
-App.use('/rol', rolRoutes);
+App.use('/api', rolRoutes);
 
 export default App;
