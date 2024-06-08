@@ -12,4 +12,5 @@ router.post("/register", validateschema(registerSchema) ,register);
 router.post("/login",validateschema(loginSchema) , login);
 router.get("/auth/verify", authRequired , veifyToken );
 
+
 export default router;
