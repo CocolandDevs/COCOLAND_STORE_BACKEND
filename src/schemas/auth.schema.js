@@ -19,6 +19,10 @@ export const registerSchema = z.object({
         }).min(6, {
             message: 'Password must be at least 6 characters long'
         }),
+    isAdmin: z.
+        boolean({
+            required_error: 'isAdmin is required'
+        }),
 });
 
 export const loginSchema = z.object({
