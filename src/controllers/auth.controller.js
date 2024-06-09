@@ -1,24 +1,20 @@
 import prisma from '../libs/client.js';
 import { createAccessToken } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import { comparePassword, hashPassword } from '../libs/bycript.js';
+import { getRolByUser } from './helper.controller.js';
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
 
-export const getUsers = async () => {
-    const users = await prisma.uSUARIOS.findMany();
-    return users;
-}
-
-
 export const register = async (req,res) => {
-    const { username, email, password, isAdmin } = req.body;
+    const { username, email, password } = req.body;
     try {
         const userFound = await prisma.uSUARIOS.findUnique( { where: { email } });
 
         if (userFound) return res.status(400).json(["User already exists"]);
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        const passwordHash = await hashPassword(password);
+        console.log(passwordHash);
 
         const user = await prisma.uSUARIOS.create({
             data: {
@@ -27,6 +23,17 @@ export const register = async (req,res) => {
                 password : passwordHash
             }
         });
+        //obtenemos el rol de Administrador
+        const rol = await prisma.rOLES.findFirst({where : {nombre :  "Usuario"}});
+
+        //creamos el rol del usuario
+        await prisma.uSUARIOS_ROLES.create({
+            data : {
+                id_usuario : user.id,
+                id_rol : rol.id
+            }
+        });
+
         const token = await createAccessToken({ id: user.id });
 
         res.cookie("access_token", token);
@@ -34,7 +41,8 @@ export const register = async (req,res) => {
         res.status(200).json({
             message: "User created successfully",
             usuario: user,
-            access_token: token       
+            access_token: token,
+            rol: rol      
         });
 
     } catch (error) {
@@ -52,11 +60,13 @@ export const login = async (req,res) => {
         
         if (!userfound) return res.status(400).json(["User not found"]);
 
-        const isMatch = await bcrypt.compare(password, userfound.password);
+        const isMatch =  await comparePassword(password, userfound.password);
 
         if (!isMatch) return res.status(400).json(["Invalid credentials"]);
 
         const token = await createAccessToken({ id: userfound.id });
+
+        const rol = await getRolByUser(userfound.id);
 
         res.cookie("access_token", token);
 
@@ -64,6 +74,7 @@ export const login = async (req,res) => {
             message: "User logged in successfully",
             usuario: userfound,
             access_token: token,
+            rol: rol
         });
 
     } catch (error) {
@@ -106,4 +117,16 @@ export const veifyToken = async (req,res) =>{
         });
     })
 
+}
+
+export const hashPasswordTest = async (req,res) => {
+    const { password } = req.body;
+    try {
+        const passwordHash = await hashPassword(password);
+        res.status(200).json({ 
+            contraseñaGenerada : passwordHash 
+        });
+    } catch (error) {
+        res.status(500).json([error.message]);
+    }
 }

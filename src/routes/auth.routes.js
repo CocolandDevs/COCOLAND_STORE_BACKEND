@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, logout, register, veifyToken } from "../controllers/auth.controller.js";
+import { hashPasswordTest, login, logout, register, veifyToken } from "../controllers/auth.controller.js";
 import { validateschema } from "../middlewares/validator.middleware.js";
 import { loginSchema, registerSchema } from "../schemas/auth.schema.js";
 import { authRequired } from "../middlewares/validateToken.js";
@@ -12,6 +12,9 @@ router.post("/auth/register", validateschema(registerSchema) ,register);
 router.post("/auth/login",validateschema(loginSchema) , login);
 router.post("/auth/logout", logout);
 router.get("/auth/verify", authRequired , veifyToken );
+
+//rutas para pruebas
+router.post("/auth/passwordTest",hashPasswordTest);
 
 
 export default router;

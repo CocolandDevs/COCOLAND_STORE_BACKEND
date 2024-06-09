@@ -22,24 +22,91 @@ model USUARIOS {
   status  Boolean?  @default(true)
 }
 
+//Perfil de usuario
 model PERFIL_USUARIO{
   id Int @id @default(autoincrement())
   id_usuario Int?
   nombres String? @db.VarChar(100)
   apellidos String? @db.VarChar(100)
   genero String? @db.VarChar(50)
+  ubicacion_default Int?
   fecha_nacimiento DateTime?
   telefono Int? 
 }
-
+//tabla de Roles
 model ROLES {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(50)
   status Boolean? @default(true)
 }
 
+//relacion entre usuarios y roles
 model USUARIOS_ROLES {
   id Int @id @default(autoincrement())
   id_usuario Int
   id_rol Int
 }
+
+//ubicaciones de envio de un usuario
+model UBICACIONES_USUARIO {
+  id Int @id @default(autoincrement())
+  id_usuario Int
+  direccion String @db.VarChar(255)
+  codigo_postal Int
+  ciudad String @db.VarChar(100)
+  estado String @db.VarChar(100)
+  pais String @db.VarChar(100)
+  numero_interior String? @db.VarChar(50)
+  numero_exterior String? @db.VarChar(50)
+  alias String? @db.VarChar(50)
+  numero_telefonico Int
+  status Boolean? @default(true)
+}
+
+// Historial de compras de un usuario
+model COMPRAS_USUARIO {
+  id Int @id @default(autoincrement())
+  id_usuario Int
+  id_producto Int
+  id_ubicacion Int
+  cantidad Int
+  fecha_compra DateTime
+  tipo_pago String @db.VarChar(50)
+}
+
+//CATEGORIAS DE PRODUCTOS
+model CATEGORIAS {
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(100)
+  status Boolean? @default(true)
+}
+
+
+//CARACTERÍSTICAS DE PRODUCTOS
+model CARACTERISTICAS {
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(255)
+  valor String @db.VarChar(255)
+  status Boolean? @default(true)
+}
+
+
+model CARACTERISTICAS_PRODUCTOS {
+  id Int @id @default(autoincrement())
+  id_producto Int
+  id_caracteristica Int
+  status Boolean? @default(true)
+}
+
+model productos {
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(255)
+  descripcion String @db.VarChar(255)
+  id_categoria Int
+  precio Decimal
+  imagen_defualt String? @db.VarChar(255)
+  status Boolean? @default(true)
+}
+
+
+

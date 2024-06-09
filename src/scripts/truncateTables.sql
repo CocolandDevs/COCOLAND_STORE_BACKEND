@@ -1,0 +1,10 @@
+TRUNCATE TABLE perfil_usuario;
+TRUNCATE TABLE usuarios_roles;
+TRUNCATE TABLE ubicaciones_usuario;
+TRUNCATE TABLE compras_usuario;
+TRUNCATE TABLE usuarios;
+TRUNCATE TABLE roles;
+TRUNCATE TABLE productos;
+TRUNCATE TABLE categorias;
+TRUNCATE TABLE caracteristicas;
+TRUNCATE TABLE caracteristicas_productos;
