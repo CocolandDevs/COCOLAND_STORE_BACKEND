@@ -6,6 +6,7 @@ import cors from 'cors';
 //importamos las rutas
 import authRoutes from './routes/auth.routes.js';
 import rolRoutes from './routes/roles.routes.js';
+import usuarioRoutes from './routes/usuarios.routes.js';
 
 const App = express();
 
@@ -13,5 +14,6 @@ App.use(morgan('dev')).use(express.json()).use(cookieParser()).use(cors());
 
 App.use('/api', authRoutes);
 App.use('/api', rolRoutes);
+App.use('/api', usuarioRoutes);
 
 export default App;
