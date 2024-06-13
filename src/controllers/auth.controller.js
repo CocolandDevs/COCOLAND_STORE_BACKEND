@@ -14,7 +14,6 @@ export const register = async (req,res) => {
         if (userFound) return res.status(400).json(["User already exists"]);
 
         const passwordHash = await hashPassword(password);
-        console.log(passwordHash);
 
         const user = await prisma.uSUARIOS.create({
             data: {
