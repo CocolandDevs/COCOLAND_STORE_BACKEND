@@ -98,7 +98,7 @@ model CARACTERISTICAS_PRODUCTOS {
   status Boolean? @default(true)
 }
 
-model productos {
+model PRODUCTOS {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(255)
   descripcion String @db.VarChar(255)

@@ -9,7 +9,7 @@ export const productosSchema = z.object({
     }).max(255,{
         message: "La descripción del producto no puede tener más de 255 caracteres"
     }),
-    categoria: z.number({
+    id_categoria: z.number({
         required_error: "Categoria del producto es requerida",
     }).int({
         message: "La categoria del producto debe ser un número entero"
@@ -21,6 +21,9 @@ export const productosSchema = z.object({
     
     }).positive({
         message: "El precio del producto debe ser un número positivo"
+    }),
+    imagen_defualt: z.string({
+        required_error: "imagen del producto es requerido",
     }),
     status: z.boolean().nullable(),
 });

@@ -10,12 +10,12 @@ export const getCategoria = async (req, res) => {
 };
 
 export const createCagoria = async (req, res) => {
-  const { nombre, estatus } = req.body;
+  const { nombre, status } = req.body;
   try {
     const categoria = await prisma.cATEGORIAS.create({
       data: {
         nombre,
-        status: estatus || true,
+        status: status || true,
       },
     });
     res.status(200).json({
