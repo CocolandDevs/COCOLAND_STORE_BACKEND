@@ -96,27 +96,40 @@ export const logout = (req,res) =>{
  
 }
 
-export const veifyToken = async (req,res) =>{
-    const {access_token} = req.cookies;
+export const verifyToken = async (req, res) => {
+    try {
+        const { access_token } = req.cookies;
 
-    if (!access_token) return res.status(401).json(["Unauthorized"]);
-    
-    jwt.verify(access_token,TOKEN_SECRET_KEY,async (err,user)=>{
+        if (!access_token) {
+            console.log("No token provided");
+            return res.status(401).json({ error: "Unauthorized: No token provided" });
+        }
 
-        if(err) return res.status(401).json(["Unauthorized"]);
-        
-        const userFound  = await prisma.uSUARIOS.findUnique({where : {id : user.id}});
+        jwt.verify(access_token, TOKEN_SECRET_KEY, async (err, user) => {
+            if (err) {
+                return res.status(401).json({ error: "Unauthorized: Invalid token" });
+            }
 
-        if (!userFound) return res.status(400).json( ["User not found"]);
+            try {
+                const userFound = await prisma.uSUARIOS.findUnique({ where: { id: user.id } });
 
-        res.json({
-            message: "Token Activo",
-            usuario: userFound,
-            access_token: access_token
+                if (!userFound) {
+                    return res.status(404).json({ error: "User not found" });
+                }
+
+                res.json({
+                    message: "Token is active",
+                    usuario: userFound,
+                    access_token: access_token
+                });
+            } catch (error) {
+                return res.status(500).json({ error: error.message });
+            }
         });
-    })
-
-}
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 export const hashPasswordTest = async (req,res) => {
     const { password } = req.body;
