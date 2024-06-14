@@ -7,10 +7,11 @@ el proyecto maneja un `.env` por lo mismo es importanjte generar el propio.
 
 
 ## API Reference
+Tipos de Parámetros: 
 
-**Optional** -> No es necesario enviarlo
-**Required** -> Es requerido enviarlo
-**UrlRequired** -> Es requerido como parámetro de la ruta
+- **Optional** -> No es necesario enviarlo
+- **Required** -> Es requerido enviarlo
+- **UrlRequired** -> Es requerido como parámetro de la ruta
 
 #### 🔒AUTH
 
