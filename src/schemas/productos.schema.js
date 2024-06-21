@@ -40,7 +40,10 @@ export const productosSchema = z.object({
             }).positive({
                 message: "La categoria del producto debe ser un número positivo"
             }),
-        ]),
+        ],{
+            invalid_type_error: "Categoria del producto debe ser un número entero positivo",
+            required_error: "Categoria del producto es requerida",
+        }),
     precio: z
         .union([
             z.number({
@@ -54,7 +57,10 @@ export const productosSchema = z.object({
             }).regex(/^\d+(\.\d+)?$/, {
                 message: "El precio del producto debe ser un número positivo"
             })
-        ]),
+        ],{
+            invalid_type_error: "Precio del producto debe ser un número positivo",
+            required_error: "Precio del producto es requerido",
+        }),
     imagen_default: z
         .any()
         .refine((file)=> file?.size <= 5000000, "La imagen no puede pesar más de 5MB")

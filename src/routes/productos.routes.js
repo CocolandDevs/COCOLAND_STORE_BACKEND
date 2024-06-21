@@ -23,7 +23,13 @@ router.post(
   validateschema(productosSchema),
   createProducto
 );
-router.put("/productos/update/:id", authRequired, updateProductos);
+
+router.put(
+  "/productos/update/:id", 
+  authRequired,
+  validateschema(productosSchema), 
+  updateProductos
+);
 router.delete("/productos/delete/:id", authRequired, deleteProducto);
 
 export default router;

@@ -61,8 +61,12 @@ export const updateProductos = async (req, res) => {
     id_categoria,
     precio,
     imagen_default,
-    estatus 
+    status 
     } = req.body;
+
+    let precioFloat = parseFloat(precio);
+    let id_categoriaInt = parseInt(id_categoria);
+
   try {
     const producto = await prisma.pRODUCTOS.update({
       where: {
@@ -71,10 +75,10 @@ export const updateProductos = async (req, res) => {
       data: {
           nombre,
           descripcion,
-          id_categoria,
-          precio,
+          id_categoria: id_categoriaInt,
+          precio: precioFloat,
           imagen_default,
-          status: estatus || true
+          status
       },
     });
     res.status(200).json({
@@ -82,6 +86,7 @@ export const updateProductos = async (req, res) => {
       producto,
     });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json([error.message]);
   }
 };
