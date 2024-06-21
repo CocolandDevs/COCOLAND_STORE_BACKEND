@@ -1,16 +1,56 @@
 import jwt from 'jsonwebtoken';
+import prisma from '../libs/client.js';
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
 
-export const authRequired = (req,res,next) =>{
-    const {access_token} = req.cookies;
-    
-    if(!access_token) return res.status(401).json({message : "No se encontró un Token de acceso, por favor inicie sesión"});
+export const authRequired = async (req, res, next) => {
+    const { access_token } = req.cookies;
 
-    jwt.verify(access_token,TOKEN_SECRET_KEY,(err,decoded) =>{
-        if(err) return res.status(401).json({message : "Token Inválido"});
+    if (!access_token) {
+        return res.status(401).json({ message: "No se encontró un Token de acceso, por favor inicie sesión" });
+    }
+
+    try {
+        const decoded = jwt.verify(access_token, TOKEN_SECRET_KEY);
         req.user = decoded;
-    })
-    next();
-} 
+
+        const userFound = await prisma.uSUARIOS.findUnique({
+            where: {
+                id: req.user.id
+            }
+        });
+
+        if (!userFound) {
+            return res.status(401).json({ message: "Usuario no encontrado" });
+        }
+
+        const rolUsuario = await prisma.uSUARIOS_ROLES.findFirst({
+            where: {
+                id_usuario: userFound?.id
+            }
+        });
+
+        if (!rolUsuario) {
+            return res.status(401).json({ message: "Usuario no tiene un rol asignado" });
+        }
+
+        const rol = await prisma.rOLES.findUnique({
+            where: {
+                id: rolUsuario?.id_rol
+            }
+        });
+
+        if (!rol) {
+            return res.status(401).json({ message: "Rol no encontrado" });
+        }
+
+        if (rol.nombre !== "Administrador") {
+            return res.status(401).json({ message: "Usuario no autorizado" });
+        }
+
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: "Token Inválido" });
+    }
+}
 

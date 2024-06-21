@@ -1,9 +1,10 @@
-import { number, z } from "zod";
+import { z } from "zod";
 
 export const usuarioSchema = z.object({
-  username: z.string({
-    required_error: "Username is required",
-  }),
+  username: z
+    .string({
+      required_error: "Username is required",
+    }),
   email: z
     .string({
       required_error: "Email is required",
@@ -18,7 +19,61 @@ export const usuarioSchema = z.object({
     .min(6, {
       message: "Password must be at least 6 characters long",
     }),
-  status: z.boolean(),
+  status: z
+    .boolean({
+      invalid_type_error: "Status must be a boolean",
+    })
+    .optional(),
+  rol: z
+  .number({
+    required_error: "Rol is required",
+    invalid_type_error: "Rol must be a number"
+  })
+  .positive({
+    message: "Rol must be a positive number"
+  })
+  .int({
+    message: "Rol must be an integer"
+  })
+});
+
+export const updateUsuarioSchema = z.object({
+  username: z
+    .string({
+      required_error: "Username is required",
+    }),
+  email: z
+    .string({
+      required_error: "Email is required",
+    })
+    .email({
+      message: "Invalid email",
+    })
+    .optional(),
+  password: z
+    .string({
+      required_error: "Password is required",
+    })
+    .min(6, {
+      message: "Password must be at least 6 characters long",
+    })
+    .optional(),
+  status: z
+    .boolean({
+      invalid_type_error: "Status must be a boolean",
+    })
+    .optional(),
+  rol: z
+  .number({
+    required_error: "Rol is required",
+    invalid_type_error: "Rol must be a number"
+  })
+  .positive({
+    message: "Rol must be a positive number"
+  })
+  .int({
+    message: "Rol must be an integer"
+  })
 });
 
 export const emailSchema = z
@@ -38,5 +93,15 @@ export const passwordSchema = z
   });
 
 export const perfilUsuarioSchema = z.object({
-  idUsuario: number({invalid_type_error: "El id del usuario debe ser un número"}).int({message: "El id del usuario debe ser un número entero"}).positive({message: "El id del usuario debe ser un número positivo"}).optional(),
+  idUsuario: z
+    .number({
+      invalid_type_error: "El id del usuario debe ser un número"
+    })
+    .int({
+      message: "El id del usuario debe ser un número entero"
+    })
+    .positive({
+      message: "El id del usuario debe ser un número positivo"
+    })
+    .optional(),
 });

@@ -2,7 +2,6 @@ import { Router } from "express";
 import { hashPasswordTest, login, logout, register, verifyToken } from "../controllers/auth.controller.js";
 import { validateschema } from "../middlewares/validator.middleware.js";
 import { loginSchema, registerSchema } from "../schemas/auth.schema.js";
-import { authRequired } from "../middlewares/validateToken.js";
 
 
 const router = Router();

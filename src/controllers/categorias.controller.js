@@ -15,7 +15,7 @@ export const createCagoria = async (req, res) => {
     const categoria = await prisma.cATEGORIAS.create({
       data: {
         nombre,
-        status: status || true,
+        status,
       },
     });
     res.status(200).json({
@@ -29,7 +29,7 @@ export const createCagoria = async (req, res) => {
 
 export const updateCategoria = async (req, res) => {
   const { id } = req.params;
-  const { nombre, estatus } = req.body;
+  const { nombre, status } = req.body;
   try {
     const rol = await prisma.cATEGORIAS.update({
       where: {
@@ -37,7 +37,7 @@ export const updateCategoria = async (req, res) => {
       },
       data: {
         nombre,
-        status: estatus || true,
+        status,
       },
     });
     res.status(200).json({

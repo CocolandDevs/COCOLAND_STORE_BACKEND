@@ -73,7 +73,7 @@ export const createUsuario = async (req, res) => {
         name: username,
         password: passwordHash,
         email,
-        status: status ?? true,
+        status,
       },
     });
 

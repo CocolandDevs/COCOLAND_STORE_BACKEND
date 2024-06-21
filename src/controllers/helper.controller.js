@@ -19,3 +19,31 @@ export const getRolByUser = async (user) => {
         return null;
     }
 }
+
+/**
+ *  @param file Archivo de imagen;
+ * @param modulo Nombre del módulo donde se guardará la imagen;
+ */
+export const guardarImagen = async (file, modulo) => {
+    try {
+        // Generamos un token único para la imagen
+        const token = Math.random().toString(36).substring(2);
+
+        // Renombramos la imagen con ese token
+        const extension = file?.type.split('/').pop();
+        const nombreArchivo = `${token}.${extension}`;
+        file.name = nombreArchivo;
+
+        // Creamos el directorio
+        const imagePath = `../storage/img/${modulo}/${nombreArchivo}`;
+        // console.log(imagePath);
+        // Guardamos la imagen en el directorio especificado
+        await file.move(imagePath);
+
+        // Devolvemos el directorio donde se guardó la imagen
+        return imagePath;
+    } catch (error) {
+        console.log(error.message);
+        return null;
+    }
+}

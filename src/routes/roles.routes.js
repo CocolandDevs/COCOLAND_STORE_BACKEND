@@ -19,7 +19,12 @@ router.post(
   validateschema(rolSchema),
   createRol
 );
-router.put("/roles/update/:id", authRequired, updateRol);
+router.put(
+  "/roles/update/:id", 
+  authRequired, 
+  validateschema(rolSchema),
+  updateRol
+);
 router.delete("/roles/delete/:id", authRequired, deleteRol);
 
 export default router;

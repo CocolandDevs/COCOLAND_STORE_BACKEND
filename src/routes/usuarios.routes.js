@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { usuarioSchema } from "../schemas/usuarios.schema.js";
+import { updateUsuarioSchema, usuarioSchema } from "../schemas/usuarios.schema.js";
 import { validateschema } from "../middlewares/validator.middleware.js";
 import { authRequired } from "../middlewares/validateToken.js";
 
@@ -21,7 +21,12 @@ router.post(
   validateschema(usuarioSchema),
   createUsuario
 );
-router.put("/usuarios/update/:id", authRequired, updateUsuario);
+router.put(
+  "/usuarios/update/:id", 
+  authRequired, 
+  validateschema(updateUsuarioSchema),
+  updateUsuario
+);
 router.delete("/usuarios/delete/:id", authRequired, deleteUsuario);
 
 export default router;
