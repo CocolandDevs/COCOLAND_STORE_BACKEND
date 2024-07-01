@@ -15,7 +15,8 @@ import { authRequired } from "../middlewares/validateToken.js";
 const router = Router();
 //para crear la ruta primero ponemos el nombre de laruta + si es que validaremos algo + la función que se ejecutará
 
-router.get("/productos/get", authRequired, getProductos);
+router.get("/productos/get", getProductos);
+router.get("/productos/get/:id", getProductos);
 
 router.post(
   "/productos/create",

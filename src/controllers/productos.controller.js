@@ -2,7 +2,18 @@ import prisma from "../libs/client.js";
 import { guardarImagen } from "./helper.controller.js";
 
 export const getProductos = async (req, res) => {
+  const {id} = req.params;
   try {
+    if (id) {
+      const producto = await prisma.pRODUCTOS.findUnique({
+        where: {
+          id: parseInt(id),
+        },
+      });
+      if (!producto) return res.status(400).json(["Producto not found"]);
+      return res.status(200).json(producto);
+    }
+
     const producto = await prisma.pRODUCTOS.findMany();
     return res.status(200).json(producto);
   } catch (error) {
@@ -26,9 +37,9 @@ export const createProducto = async (req, res) => {
 
   try {
 
-    // if (imagen) {
-    //   imgReference = await guardarImagen(imagen,"Productos");
-    // }
+    if (imagen) {
+      imgReference = await guardarImagen(imagen,"Productos");
+    }
 
     console.log(imgReference);
 

@@ -1,3 +1,4 @@
+-- Active: 1712026696112@@127.0.0.1@3306@cocoland_store
 TRUNCATE TABLE perfil_usuario;
 TRUNCATE TABLE usuarios_roles;
 TRUNCATE TABLE ubicaciones_usuario;

@@ -117,10 +117,13 @@ export const verifyToken = async (req, res) => {
                     return res.status(404).json({ error: "User not found" });
                 }
 
+                const rol = await getRolByUser(user.id);
+
                 res.json({
                     message: "Token is active",
                     usuario: userFound,
-                    access_token: access_token
+                    access_token: access_token,
+                    rol: rol
                 });
             } catch (error) {
                 return res.status(500).json({ error: error.message });

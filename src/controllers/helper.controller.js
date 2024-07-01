@@ -26,6 +26,7 @@ export const getRolByUser = async (user) => {
  */
 export const guardarImagen = async (file, modulo) => {
     try {
+        console.log(file);
         // Generamos un token único para la imagen
         const token = Math.random().toString(36).substring(2);
 
@@ -34,11 +35,21 @@ export const guardarImagen = async (file, modulo) => {
         const nombreArchivo = `${token}.${extension}`;
         file.name = nombreArchivo;
 
+        
         // Creamos el directorio
-        const imagePath = `../storage/img/${modulo}/${nombreArchivo}`;
-        // console.log(imagePath);
+        const imagePath = `..\\storage\\img\\${modulo}\\${nombreArchivo}`;
+
+        const pathname = new URL(imagePath, import.meta.url);
+
+        console.log(pathname);
+
         // Guardamos la imagen en el directorio especificado
-        await file.move(imagePath);
+        await file.move(file.path,pathname?.pathname,err =>{
+            if (err) {
+                console.log(err.message);
+                return null;
+            }
+        });
 
         // Devolvemos el directorio donde se guardó la imagen
         return imagePath;
