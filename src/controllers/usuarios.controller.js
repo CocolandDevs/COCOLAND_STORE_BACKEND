@@ -17,7 +17,7 @@ export const getUsuarios = async (req, res) => {
           const rolUsuario = await getRolByUser(usuario.id);
 
           if (rolUsuario) {
-            usuario.rol = rolUsuario;
+            usuario.rol = rolUsuario.nombre;
           } else {
             usuario.rol = { name: "Sin Rol" };
           }
