@@ -1,11 +1,14 @@
 import { Router } from "express";
-import { updateUsuarioSchema, usuarioSchema } from "../schemas/usuarios.schema.js";
+import { ubicacionSchema, updateUsuarioSchema, usuarioSchema } from "../schemas/usuarios.schema.js";
 import { validateschema } from "../middlewares/validator.middleware.js";
 import { authRequired } from "../middlewares/validateToken.js";
 
 import {
+  agregarUbicacion,
   createUsuario,
   deleteUsuario,
+  editarUbicacion,
+  getUbicaciones,
   getUsuario,
   getUsuarios,
   updateUsuario,
@@ -47,7 +50,31 @@ router.delete(
 );
 
 //agregar ubicaciones
+router.get(
+  "/usuarios/getUbicaciones",
+  authRequired,
+  getUbicaciones
+);
 
+router.post(
+  "/usuarios/agregarUbicacion",
+  authRequired,
+  validateschema(ubicacionSchema),
+  agregarUbicacion
+);
+
+router.put(
+  "/usuarios/updateUbicacion",
+  authRequired,
+  validateschema(ubicacionSchema),
+  editarUbicacion
+);
+
+router.delete(
+  "/usuarios/deleteUbicacion",
+  authRequired,
+  editarUbicacion
+);
 
 
 //agregarPerfil

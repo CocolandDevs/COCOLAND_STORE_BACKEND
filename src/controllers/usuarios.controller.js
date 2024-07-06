@@ -1,6 +1,6 @@
 import { hashPassword } from "../libs/bycript.js";
 import prisma from "../libs/client.js";
-import { getRolByUser } from "./helper.controller.js";
+import { getRolByUser, userExist } from "./helper.controller.js";
 import { emailSchema, passwordSchema } from "../schemas/usuarios.schema.js";
 
 export const getUsuarios = async (req, res) => {
@@ -186,3 +186,153 @@ export const deleteUsuario = async (req, res) => {
     res.json([error.message]);
   }
 };
+
+//Ubicaciones de usuarios
+export const getUbicaciones = async (req, res) => {
+  try {
+    const { id_usuario } = req.body;
+
+    const usuario = await userExist(id_usuario);
+    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+
+    const ubicaciones = await prisma.uBICACIONES_USUARIO.findMany({
+      where: {
+        id_usuario: parseInt(id_usuario),
+        status: true,
+      },
+    });
+
+    if (ubicaciones.length !== 0) {
+      res.json(ubicaciones);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    res.json([error.message]);
+  }
+}
+
+
+export const agregarUbicacion = async (req, res) => {
+  try {
+    const {
+      id_usuario,
+      direccion,
+      codigo_postal,
+      ciudad,
+      estado,
+      pais,
+      numero_interior,
+      numero_exterior,
+      alias,
+      numero_telefonico,
+      status,
+    } = req.body;
+
+    const usuario = await userExist(id_usuario);
+    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+
+    const ubicacion = await prisma.uBICACIONES_USUARIO.create({
+      data: {
+        id_usuario : parseInt(id_usuario),
+        direccion,
+        codigo_postal : parseInt(codigo_postal),
+        ciudad,
+        estado,
+        pais,
+        numero_interior,
+        numero_exterior,
+        alias,
+        numero_telefonico : parseInt(numero_telefonico),
+        status,
+      },
+    });
+    
+    if (!ubicacion) return res.json({ message: "Error al agregar ubicacion" });
+
+    res.json({
+      message: "Ubicacion agregada exitosamente",
+      ubicacion,
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.json([error.message]);
+  }
+};
+
+export const editarUbicacion = async (req, res) => {
+  try {
+    const {
+      id,
+      id_usuario,
+      direccion,
+      codigo_postal,
+      ciudad,
+      estado,
+      pais,
+      numero_interior,
+      numero_exterior,
+      alias,
+      numero_telefonico,
+      status,
+    } = req.body;
+
+    const usuario = await userExist(id_usuario);
+    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+
+    const ubicacion = await prisma.uBICACIONES_USUARIO.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        id_usuario : parseInt(id_usuario),
+        direccion,
+        codigo_postal : parseInt(codigo_postal),
+        ciudad,
+        estado,
+        pais,
+        numero_interior,
+        numero_exterior,
+        alias,
+        numero_telefonico : parseInt(numero_telefonico),
+        status,
+      },
+    });
+
+    if (!ubicacion) return res.json({ message: "Error al editar ubicacion" });
+
+    res.json({
+      message: "Ubicacion editada exitosamente",
+      ubicacion,
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.json([error.message]);
+  }
+}
+
+export const deleteUbicacion = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    const ubicacionDeleted = await prisma.uBICACIONES_USUARIO.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        status: false,
+      },
+    });
+
+    if (!ubicacionDeleted) return res.json({ message: "Ubicacion no encontrada" });
+
+    res.json({
+      message: "Ubicacion eliminada exitosamente",
+      ubicacion: ubicacionDeleted,
+    });
+  } catch (error) {
+    res.json([error.message]);
+  }
+}

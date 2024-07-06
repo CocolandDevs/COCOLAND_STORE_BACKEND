@@ -58,3 +58,12 @@ export const guardarImagen = async (file, modulo) => {
         return null;
     }
 }
+
+export const userExist = async (id) => {
+    try {
+        const user = await prisma.uSUARIOS.findUnique({ where: { id : parseInt(id) } });
+        return user ? user : null;
+    } catch (error) {
+        return null;
+    }
+}
