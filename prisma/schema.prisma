@@ -105,7 +105,7 @@ model PRODUCTOS {
   descripcion String @db.VarChar(255)
   id_categoria Int
   precio Decimal
-  imagen_defualt String? @db.VarChar(255)
+  imagen_default String? @db.VarChar(255)
   status Boolean? @default(true)
 }
 

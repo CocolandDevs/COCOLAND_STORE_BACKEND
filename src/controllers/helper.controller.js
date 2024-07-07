@@ -1,4 +1,5 @@
 import prisma from "../libs/client.js"
+import fs from "fs";
 
 export const getRolByUser = async (user) => {
     try {
@@ -26,33 +27,25 @@ export const getRolByUser = async (user) => {
  */
 export const guardarImagen = async (file, modulo) => {
     try {
-        console.log(file);
         // Generamos un token único para la imagen
         const token = Math.random().toString(36).substring(2);
 
         // Renombramos la imagen con ese token
         const extension = file?.type.split('/').pop();
         const nombreArchivo = `${token}.${extension}`;
-        file.name = nombreArchivo;
-
         
-        // Creamos el directorio
-        const imagePath = `..\\storage\\img\\${modulo}\\${nombreArchivo}`;
+        file.name = nombreArchivo;
+        
+        const newPath = `./public/${modulo}/${nombreArchivo}`;
 
-        const pathname = new URL(imagePath, import.meta.url);
-
-        console.log(pathname);
-
-        // Guardamos la imagen en el directorio especificado
-        await file.move(file.path,pathname?.pathname,err =>{
-            if (err) {
-                console.log(err.message);
-                return null;
-            }
-        });
-
+        //creamos el directorio si no existe
+        if (!fs.existsSync(`./public/${modulo}`)) {
+            fs.mkdirSync(`./public/${modulo}`, { recursive: true });
+        }
+        fs.renameSync(file.path, newPath);
+      
         // Devolvemos el directorio donde se guardó la imagen
-        return imagePath;
+        return `/public/${modulo}/${nombreArchivo}`;
     } catch (error) {
         console.log(error.message);
         return null;
@@ -63,6 +56,17 @@ export const userExist = async (id) => {
     try {
         const user = await prisma.uSUARIOS.findUnique({ where: { id : parseInt(id) } });
         return user ? user : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+export const getImage = async (path) => {
+    try {
+        const image = fs.readFileSync('.' + path,{encoding: 'base64'});
+        // console.log(image);
+        return image;
+        
     } catch (error) {
         return null;
     }
