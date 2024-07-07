@@ -32,6 +32,7 @@ model PERFIL_USUARIO{
   ubicacion_default Int?
   fecha_nacimiento DateTime?
   telefono Int? 
+  imagen String? @db.VarChar(255)
 }
 //tabla de Roles
 model ROLES {

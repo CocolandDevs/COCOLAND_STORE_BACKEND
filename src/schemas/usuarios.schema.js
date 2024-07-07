@@ -98,17 +98,47 @@ export const passwordSchema = z
   });
 
 export const perfilUsuarioSchema = z.object({
-  idUsuario: z
-    .number({
-      invalid_type_error: "El id del usuario debe ser un número"
+  id_usuario: z
+   .union([...validationId],{
+     invalid_type_error: "Usuario debe ser un número entero positivo",
+     required_error: "Usuario es requerido",
+   }),
+  nombres : z
+   .string({
+      required_error: "Nombres es requerido",
     })
-    .int({
-      message: "El id del usuario debe ser un número entero"
+    .max(100,"Nombres no puede tener más de 100 caracteres")
+    .optional(),
+  apellidos : z
+    .string({
+      required_error: "Apellidos es requerido",
     })
-    .positive({
-      message: "El id del usuario debe ser un número positivo"
+    .max(100,"Apellidos no puede tener más de 100 caracteres")
+    .optional(),
+  genero : z
+    .string({
+      required_error: "Género es requerido",
     })
     .optional(),
+    ubicacion_default: z 
+      .union([...validationId],{
+        invalid_type_error: "Ubicación default debe ser un número entero positivo",
+      })
+      .optional(),
+    fecha_nacimiento: z
+      .string({
+        invalid_type_error: "Fecha de nacimiento debe ser una cadena de texto",
+      })
+      .date({
+        message: "Fecha de nacimiento no es válida",
+      })
+      .optional(),
+    telefono: z
+      .union([...validationId],{
+        invalid_type_error: "Teléfono debe ser un número entero positivo",
+        required_error: "Teléfono es requerido",
+      })
+      .optional(),
 });
 
 export const ubicacionSchema = z.object({

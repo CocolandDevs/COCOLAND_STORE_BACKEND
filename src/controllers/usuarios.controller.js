@@ -333,6 +333,90 @@ export const deleteUbicacion = async (req, res) => {
       ubicacion: ubicacionDeleted,
     });
   } catch (error) {
+    console.log(error);
+    res.json([error.message]);
+  }
+}
+
+
+//Perfiles de usuarios
+export const getPerfil = async (req, res) => {
+  try {
+    const {id_usuario} = req.body;
+    const usuario = await userExist(id_usuario);
+    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+
+    const perfil = await prisma.pERFIL_USUARIO.findFirst({
+      where: {
+        id_usuario: parseInt(id_usuario),
+        status: true,
+      },
+    });
+
+    if (!perfil) return res.json({ message: "Perfil no encontrado" });
+
+    res.json(perfil);
+  } catch (error) {
+    console.log(error);
+    res.json([error.message]);
+  }
+}
+
+export const agregarPerfil = async (req, res) => {
+  try {
+    const {
+      id_usuario,
+      nombres,
+      apellidos,
+      genero,
+      ubicacion_default,
+      fecha_nacimiento,
+      telefono,
+    } = req.body;
+
+    const usuario = await userExist(id_usuario);
+    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+
+    const fechaNacimiento = new Date(fecha_nacimiento);
+
+    const dataPerfil = {
+      id_usuario : parseInt(id_usuario),
+      nombres : nombres ?? null,
+      apellidos : apellidos ?? null,
+      genero : genero ?? null,
+      ubicacion_default : parseInt(ubicacion_default) ?? null,
+      fecha_nacimiento : fechaNacimiento ?? null,
+      telefono : parseInt(telefono) ?? null,
+    };
+
+    const perfilExist = await prisma.pERFIL_USUARIO.findFirst({
+      where: {
+        id_usuario: parseInt(id_usuario),
+      },
+    });
+    let perfil;
+
+    if (!perfilExist) {
+      perfil = await prisma.pERFIL_USUARIO.create({
+        data: dataPerfil,
+      });
+    }else{
+      perfil = await prisma.pERFIL_USUARIO.update({
+        where: {
+          id: perfilExist.id,
+        },
+        data: dataPerfil,
+      });
+    
+    }
+    
+    res.json({
+      message: "Perfil agregado exitosamente",
+      perfil,
+    });
+
+  } catch (error) {
+    console.log(error);
     res.json([error.message]);
   }
 }
