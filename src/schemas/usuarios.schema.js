@@ -192,5 +192,5 @@ export const ubicacionSchema = z.object({
     .boolean({
       invalid_type_error: "Status must be a boolean",
     })
-    .optional(),
+    .optional()
 });
