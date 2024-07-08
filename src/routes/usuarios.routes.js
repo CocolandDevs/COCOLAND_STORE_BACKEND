@@ -10,6 +10,7 @@ import {
   deleteUbicacion,
   deleteUsuario,
   editarUbicacion,
+  getImagePerfil,
   getUbicaciones,
   getUsuario,
   getUsuarios,
@@ -88,6 +89,10 @@ router.post(
   agregarPerfil
 );
 
+router.get(
+  "/usuarios/getImage/:id",
+  getImagePerfil
+);
 
 
 export default router;

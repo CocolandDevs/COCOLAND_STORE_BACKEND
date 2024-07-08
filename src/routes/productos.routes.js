@@ -5,7 +5,8 @@ import {
   getProductos,
   createProducto,
   updateProductos,
-  deleteProducto
+  deleteProducto,
+  getImageProducto
 
 
  } from "../controllers/productos.controller.js";
@@ -31,6 +32,15 @@ router.put(
   validateschema(productosSchema), 
   updateProductos
 );
-router.delete("/productos/delete/:id", authRequired, deleteProducto);
+router.delete(
+  "/productos/delete/:id", 
+  authRequired, 
+  deleteProducto
+);
+
+router.get(
+  "/productos/getImage/:id",
+  getImageProducto
+)
 
 export default router;

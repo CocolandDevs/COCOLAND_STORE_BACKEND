@@ -1,6 +1,6 @@
 import { hashPassword } from "../libs/bycript.js";
 import prisma from "../libs/client.js";
-import { getRolByUser, userExist } from "./helper.controller.js";
+import { getImage, getRolByUser, guardarImagen, userExist } from "./helper.controller.js";
 import { emailSchema, passwordSchema } from "../schemas/usuarios.schema.js";
 
 export const getUsuarios = async (req, res) => {
@@ -373,11 +373,18 @@ export const agregarPerfil = async (req, res) => {
       fecha_nacimiento,
       telefono,
     } = req.body;
-
+    
+    
+    let image = req?.files?.imagen ?? null;
+    let imgReference = null;
+    const fechaNacimiento = new Date(fecha_nacimiento);
     const usuario = await userExist(id_usuario);
+
     if (!usuario) return res.json({ message: "Usuario no encontrado" });
 
-    const fechaNacimiento = new Date(fecha_nacimiento);
+    if (image != null) {
+      imgReference = await guardarImagen(image, "Perfiles");
+    }
 
     const dataPerfil = {
       id_usuario : parseInt(id_usuario),
@@ -387,6 +394,7 @@ export const agregarPerfil = async (req, res) => {
       ubicacion_default : parseInt(ubicacion_default) ?? null,
       fecha_nacimiento : fechaNacimiento ?? null,
       telefono : parseInt(telefono) ?? null,
+      imagen : imgReference ?? null,
     };
 
     const perfilExist = await prisma.pERFIL_USUARIO.findFirst({
@@ -415,6 +423,31 @@ export const agregarPerfil = async (req, res) => {
       perfil,
     });
 
+  } catch (error) {
+    console.log(error);
+    res.json([error.message]);
+  }
+}
+
+export const getImagePerfil = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const perfil = await prisma.pERFIL_USUARIO.findFirst({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!perfil) return res.json({ message: "Perfil no encontrado" });
+
+    let imagen = perfil.imagen;
+    
+    if (imagen == null) {
+      return res.status(400).json(["No image found"]);
+    }
+    
+    const base64 = await getImage(imagen);
+    return res.status(200).json(base64);
   } catch (error) {
     console.log(error);
     res.json([error.message]);

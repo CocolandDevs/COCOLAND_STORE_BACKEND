@@ -64,10 +64,19 @@ export const userExist = async (id) => {
 export const getImage = async (path) => {
     try {
         const image = fs.readFileSync('.' + path,{encoding: 'base64'});
-        // console.log(image);
-        return image;
+        let pathSplit = path.split('/');
+        let name = pathSplit[pathSplit.length - 1];
+        let extension = name.split('.')[1];
+
+        console.log(name,extension);
+
+        let image64 = `data:image/${extension};base64,${image}`;
+
+        return image64;
         
     } catch (error) {
+        console.log(error.message);
         return null;
     }
 }
+
