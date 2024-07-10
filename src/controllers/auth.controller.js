@@ -87,7 +87,7 @@ export const logout = (req,res) =>{
         res.cookie('access_token',"",{
             expires : new Date(0)
            });
-        return res.status(200).json({message : "User logged out"});
+        return res.status(200).json(["User logged out"]);
 
     } catch (error) {
         res.status(500).json([error.message]);

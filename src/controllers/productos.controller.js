@@ -37,7 +37,7 @@ export const createProducto = async (req, res) => {
     let imgReference = null;
     let precioFloat = parseFloat(precio);
     let id_categoriaInt = parseInt(id_categoria);
-
+ 
   try {
 
     if (imagen) {
