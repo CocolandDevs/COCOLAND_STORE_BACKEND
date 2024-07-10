@@ -6,9 +6,9 @@ import { emailSchema, passwordSchema } from "../schemas/usuarios.schema.js";
 export const getUsuarios = async (req, res) => {
   try {
     const usuarios = await prisma.uSUARIOS.findMany({
-      where: {
-        status: true,
-      },
+      // where: {
+      //   status: true,
+      // },
     });
 
     if (usuarios.length !== 0) {
@@ -42,7 +42,7 @@ export const getUsuario = async (req, res) => {
         id: parseInt(id),
       },
     });
-    if (!usuario) return res.status(500).json({ message: "Usuario no encontrado" });
+    if (!usuario) return res.status(500).json(["Usuario no encontrado"]);
     const rolUsuario = await getRolByUser(usuario.id);
 
     if (rolUsuario) usuario.rol = rolUsuario;
@@ -59,11 +59,11 @@ export const createUsuario = async (req, res) => {
 
   try {
     const usuarioExist = await prisma.uSUARIOS.findFirst({ where: { email } });
-    if (usuarioExist) return res.status(400).json({ message: "Usuario ya existe" });
+    if (usuarioExist) return res.status(400).json(["Usuario ya existe"]);
 
-    const rolAsignado = await prisma.rOLES.findUnique({ where: { id: rol } });
-    if (!rolAsignado) return res.status(500).json({ message: "Rol no encontrado" });
-    if (!rolAsignado.status) return res.status(500).json({ message: "Rol deshabilitado" });
+    const rolAsignado = await prisma.rOLES.findUnique({ where: { id: parseInt(rol) } });
+    if (!rolAsignado) return res.status(500).json( ["Rol no encontrado"] );
+    if (!rolAsignado.status) return res.status(500).json(["Rol deshabilitado"]);
 
     const passwordHash = await hashPassword(password);
 
@@ -80,7 +80,7 @@ export const createUsuario = async (req, res) => {
     // Asignar el rol al usuario
     const rolUser = await prisma.uSUARIOS_ROLES.create({
       data: {
-        id_rol: rol,
+        id_rol: parseInt(rol),
         id_usuario: usuario.id,
       },
     });
@@ -93,7 +93,7 @@ export const createUsuario = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json([ error.message ]);
   }
 };
 
@@ -109,19 +109,19 @@ export const updateUsuario = async (req, res) => {
     // Buscar el usuario
     const usuario = await prisma.uSUARIOS.findUnique({ where: { id: userId } });
 
-    if (!usuario) return res.status(500).json({ message: "Usuario no encontrado" });
+    if (!usuario) return res.status(500).json(["Usuario no encontrado" ]);
 
     // Validar email si ha cambiado
     if (email && email !== usuario.email) {
       const emailValidation = emailSchema.safeParse(email);
-      if (!emailValidation.success) return res.status(400).json({ message: emailValidation.error.issues[0].message });
+      if (!emailValidation.success) return res.status(400).json([emailValidation.error.issues[0].message]);
     }
 
     // Validar y hashear la contraseña si ha cambiado
     let passwordHash = usuario.password;
     if (password && password !== usuario.password) {
       const passwordValidation = passwordSchema.safeParse(password);
-      if (!passwordValidation.success) return res.status(400).json({ message: passwordValidation.error.issues[0].message });
+      if (!passwordValidation.success) return res.status(400).json([passwordValidation.error.issues[0].message]);
       passwordHash = await hashPassword(password);
     }
 
@@ -139,8 +139,8 @@ export const updateUsuario = async (req, res) => {
     // Buscar y actualizar rol si ha cambiado
     const rolAsignado = await prisma.rOLES.findUnique({ where: { id: rol } });
     
-    if (!rolAsignado) return res.status(500).json({ message: "Rol no encontrado" });
-    if (!rolAsignado.status) return res.status(500).json({ message: "Rol deshabilitado" });
+    if (!rolAsignado) return res.status(500).json(["Rol no encontrado"] );
+    if (!rolAsignado.status) return res.status(500).json(["Rol deshabilitado"]);
     const rolUsuario = await prisma.uSUARIOS_ROLES.findFirst({ where: { id_usuario: userId } });
     
     if (rolUsuario && rolUsuario.id_rol !== rolAsignado.id) {
@@ -159,7 +159,7 @@ export const updateUsuario = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json([ error.message ]);
   }
 };
 
@@ -176,7 +176,7 @@ export const deleteUsuario = async (req, res) => {
       },
     });
 
-    if (!usuarioDeleted) return res.json({ message: "Usuario no encontrado" });
+    if (!usuarioDeleted) return res.json(["Usuario no encontrado"]);
 
     res.json({
       message: "Usuario eliminado exitosamente",
@@ -193,7 +193,7 @@ export const getUbicaciones = async (req, res) => {
     const { id_usuario } = req.body;
 
     const usuario = await userExist(id_usuario);
-    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+    if (!usuario) return res.json(["Usuario no encontrado"]);
 
     const ubicaciones = await prisma.uBICACIONES_USUARIO.findMany({
       where: {
@@ -230,7 +230,7 @@ export const agregarUbicacion = async (req, res) => {
     } = req.body;
 
     const usuario = await userExist(id_usuario);
-    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+    if (!usuario) return res.json(["Usuario no encontrado"]);
 
     const ubicacion = await prisma.uBICACIONES_USUARIO.create({
       data: {
@@ -248,7 +248,7 @@ export const agregarUbicacion = async (req, res) => {
       },
     });
     
-    if (!ubicacion) return res.json({ message: "Error al agregar ubicacion" });
+    if (!ubicacion) return res.json(["Error al agregar ubicacion"]);
 
     res.json({
       message: "Ubicacion agregada exitosamente",
@@ -279,7 +279,7 @@ export const editarUbicacion = async (req, res) => {
     } = req.body;
 
     const usuario = await userExist(id_usuario);
-    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+    if (!usuario) return res.json(["Usuario no encontrado"]);
 
     const ubicacion = await prisma.uBICACIONES_USUARIO.update({
       where: {
@@ -300,7 +300,7 @@ export const editarUbicacion = async (req, res) => {
       },
     });
 
-    if (!ubicacion) return res.json({ message: "Error al editar ubicacion" });
+    if (!ubicacion) return res.json(["Error al editar ubicacion" ]);
 
     res.json({
       message: "Ubicacion editada exitosamente",
@@ -326,7 +326,7 @@ export const deleteUbicacion = async (req, res) => {
       },
     });
 
-    if (!ubicacionDeleted) return res.json({ message: "Ubicacion no encontrada" });
+    if (!ubicacionDeleted) return res.json(["Ubicacion no encontrada"]);
 
     res.json({
       message: "Ubicacion eliminada exitosamente",
@@ -344,7 +344,7 @@ export const getPerfil = async (req, res) => {
   try {
     const {id_usuario} = req.body;
     const usuario = await userExist(id_usuario);
-    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+    if (!usuario) return res.json(["Usuario no encontrado"]);
 
     const perfil = await prisma.pERFIL_USUARIO.findFirst({
       where: {
@@ -353,7 +353,7 @@ export const getPerfil = async (req, res) => {
       },
     });
 
-    if (!perfil) return res.json({ message: "Perfil no encontrado" });
+    if (!perfil) return res.json(["Perfil no encontrado"]);
 
     res.json(perfil);
   } catch (error) {
@@ -380,7 +380,7 @@ export const agregarPerfil = async (req, res) => {
     const fechaNacimiento = new Date(fecha_nacimiento);
     const usuario = await userExist(id_usuario);
 
-    if (!usuario) return res.json({ message: "Usuario no encontrado" });
+    if (!usuario) return res.json(["Usuario no encontrado"]);
 
     if (image != null) {
       imgReference = await guardarImagen(image, "Perfiles");
@@ -438,7 +438,7 @@ export const getImagePerfil = async (req, res) => {
       },
     });
 
-    if (!perfil) return res.status(400).json({ message: "Perfil no encontrado" });
+    if (!perfil) return res.status(400).json(["Perfil no encontrado"]);
 
     let imagen = perfil.imagen;
     

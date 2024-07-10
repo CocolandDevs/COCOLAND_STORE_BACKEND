@@ -30,16 +30,10 @@ export const usuarioSchema = z.object({
     })
     .optional(),
   rol: z
-  .number({
-    required_error: "Rol is required",
-    invalid_type_error: "Rol must be a number"
-  })
-  .positive({
-    message: "Rol must be a positive number"
-  })
-  .int({
-    message: "Rol must be an integer"
-  })
+  .union([...validationId],{
+    invalid_type_error: "el Rol debe ser un número entero positivo",
+    required_error: "el Rol es requerido",
+  }),
 });
 
 export const updateUsuarioSchema = z.object({
