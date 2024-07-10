@@ -438,7 +438,7 @@ export const getImagePerfil = async (req, res) => {
       },
     });
 
-    if (!perfil) return res.json({ message: "Perfil no encontrado" });
+    if (!perfil) return res.status(400).json({ message: "Perfil no encontrado" });
 
     let imagen = perfil.imagen;
     
