@@ -42,7 +42,7 @@ router.post(
 router.put(
   "/usuarios/update/:id", 
   authRequired, 
-  validateschema(updateUsuarioSchema),
+  // validateschema(updateUsuarioSchema),
   updateUsuario
 );
 
