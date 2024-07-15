@@ -339,17 +339,18 @@ export const deleteUbicacion = async (req, res) => {
 }
 
 
-//Perfiles de usuarios
+//Perfiles de usuarios 
 export const getPerfil = async (req, res) => {
-  try {
+  try { 
+    console.log(req.body)
     const {id_usuario} = req.body;
     const usuario = await userExist(id_usuario);
     if (!usuario) return res.json(["Usuario no encontrado"]);
+    //console.log(usuario);
 
     const perfil = await prisma.pERFIL_USUARIO.findFirst({
       where: {
-        id_usuario: parseInt(id_usuario),
-        status: true,
+        id_usuario: parseInt(id_usuario)
       },
     });
 

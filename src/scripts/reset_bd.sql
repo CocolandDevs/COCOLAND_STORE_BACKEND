@@ -1,3 +1,4 @@
+
 CREATE Procedure sp_reset_bd()
 BEGIN
     TRUNCATE TABLE perfil_usuario;

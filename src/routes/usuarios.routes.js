@@ -15,6 +15,7 @@ import {
   getUsuario,
   getUsuarios,
   updateUsuario,
+  getPerfil,
 } from "../controllers/usuarios.controller.js";
 
 const router = Router();
@@ -81,6 +82,11 @@ router.delete(
 
 
 //agregarPerfil
+router.get(
+  "/usuarios/perfil",
+  authRequired,
+  getPerfil
+)
 
 router.post(
   "/usuarios/agregarPerfil",
