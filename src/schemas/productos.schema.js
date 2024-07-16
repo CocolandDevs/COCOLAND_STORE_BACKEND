@@ -63,14 +63,25 @@ export const productosSchema = z.object({
         }),
     imagen_default: z
         .any()
-        .refine((file)=> file?.size <= 5000000, "La imagen no puede pesar más de 5MB")
-        .refine(
-            (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-            "Only .jpg, .jpeg, .png and .webp formats are supported."
-        )
+        // .refine(
+        //     (file) =>{
+        //         console.log(file);
+        //         file?.size >= 5000000
+        //     }, "La imagen no puede pesar más de 5MB")
+        // .refine(
+        //     (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+        //     "Only .jpg, .jpeg, .png and .webp formats are supported."
+        // )
         .optional(),
     status: z
-        .boolean({
-            invalid_type_error: "Estado del producto debe ser un booleano",
-        }).optional(),
+        .union([
+            z.boolean({
+                invalid_type_error: "Estado del producto debe ser un booleano",
+            }),
+            z.string({
+                required_error: "Estado del producto es requerido",
+            }).refine(value => value === "true", {
+                message: "El estado del producto debe ser 'true' como string"
+            })
+        ]).optional(),
 });
