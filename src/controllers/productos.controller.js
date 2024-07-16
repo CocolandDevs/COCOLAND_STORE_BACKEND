@@ -32,7 +32,7 @@ export const createProducto = async (req, res) => {
     precio,
     status 
     } = req.body;
-
+    // console.log(req);
     let imagen = req?.files?.imagen_default ?? null;
     let imgReference = null;
     let precioFloat = parseFloat(precio);
@@ -51,7 +51,7 @@ export const createProducto = async (req, res) => {
       id_categoria: id_categoriaInt,
       precio: precioFloat,
       imagen_default: imgReference,
-      status: status 
+      status: status == "true" ? true : false,
       },
     });
 
@@ -72,14 +72,19 @@ export const updateProductos = async (req, res) => {
     descripcion,
     id_categoria,
     precio,
-    imagen_default,
     status 
     } = req.body;
 
+    let imagen = req?.files?.imagen_default ?? null;
+    let imgReference = null;
     let precioFloat = parseFloat(precio);
     let id_categoriaInt = parseInt(id_categoria);
 
   try {
+    if (imagen) {
+      imgReference = await guardarImagen(imagen,"Productos");
+    }
+
     const producto = await prisma.pRODUCTOS.update({
       where: {
         id: parseInt(id),
@@ -89,8 +94,8 @@ export const updateProductos = async (req, res) => {
           descripcion,
           id_categoria: id_categoriaInt,
           precio: precioFloat,
-          imagen_default,
-          status
+          imagen_default: imgReference,
+          status: status == "true" ? true : false,
       },
     });
     res.status(200).json({
