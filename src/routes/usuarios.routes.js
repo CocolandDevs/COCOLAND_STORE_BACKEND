@@ -82,7 +82,7 @@ router.delete(
 
 
 //agregarPerfil
-router.get(
+router.post(
   "/usuarios/perfil",
   authRequired,
   getPerfil
