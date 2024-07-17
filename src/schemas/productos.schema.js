@@ -80,7 +80,11 @@ export const productosSchema = z.object({
             }),
             z.string({
                 required_error: "Estado del producto es requerido",
-            }).refine(value => value === "true", {
+            }).refine(value => {
+                if (value === "true" || value === "false") {
+                    return true;
+                }
+            }, {
                 message: "El estado del producto debe ser 'true' como string"
             })
         ]).optional(),

@@ -61,7 +61,7 @@ export const userExist = async (id) => {
     }
 }
 
-export const getImage = async (path) => {
+export const getImage = (path) => {
     try {
         const image = fs.readFileSync('.' + path,{encoding: 'base64'});
         let pathSplit = path.split('/');

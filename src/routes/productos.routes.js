@@ -6,7 +6,8 @@ import {
   createProducto,
   updateProductos,
   deleteProducto,
-  getImageProducto
+  getImageProducto,
+  getProductosImage
 
 
  } from "../controllers/productos.controller.js";
@@ -43,4 +44,14 @@ router.get(
   getImageProducto
 )
 
+router.get(
+  "/productos/getShop/:id",
+  authRequired, 
+  getProductosImage
+)
+
+router.get(
+  "/productos/getShop",
+  getProductosImage
+)
 export default router;

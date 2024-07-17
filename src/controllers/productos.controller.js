@@ -1,3 +1,4 @@
+import { date } from "zod";
 import prisma from "../libs/client.js";
 import { getImage, guardarImagen } from "./helper.controller.js";
 
@@ -23,6 +24,49 @@ export const getProductos = async (req, res) => {
     return res.status(500).json([error.message]);
   }
 };
+
+export const getProductosImage = async(req,res) => {
+  const {id} = req.params;
+  try {
+
+    if (id) {
+      const producto = await prisma.pRODUCTOS.findUnique({
+        where: {
+          id: parseInt(id),
+        },
+      });
+
+      if (!producto) return res.status(400).json(["Producto not found"]);
+      
+      if (producto.imagen_default != null) {
+        producto.imagen_default = getImage(imagen);
+      }
+
+      return res.status(200).json(producto);
+    }
+
+    const productos = await prisma.pRODUCTOS.findMany({
+      where: {
+        status: true,
+      
+      }
+    });
+
+    if (productos.length > 0) {
+      productos.forEach(async (producto) => {
+        if (producto.imagen_default != null) {
+          producto.imagen_default = getImage(producto.imagen_default);
+        }
+      });
+    }
+
+    return res.status(200).json(productos);
+
+
+  } catch (error) {
+      return res.status(500).json([error.message]);
+  }
+}
 
 export const createProducto = async (req, res) => {
   const { 
@@ -79,24 +123,34 @@ export const updateProductos = async (req, res) => {
     let imgReference = null;
     let precioFloat = parseFloat(precio);
     let id_categoriaInt = parseInt(id_categoria);
+    let dataProducto = {};
 
   try {
     if (imagen) {
       imgReference = await guardarImagen(imagen,"Productos");
+      dataProducto = {
+        nombre,
+        descripcion,
+        id_categoria: id_categoriaInt,
+        precio: precioFloat,
+        imagen_default: imgReference,
+        status: status == "true" ? true : false,
+      };
+    }else{
+      dataProducto = {
+        nombre,
+        descripcion,
+        id_categoria: id_categoriaInt,
+        precio: precioFloat,
+        status: status == "true" ? true : false,
+      }
     }
 
     const producto = await prisma.pRODUCTOS.update({
       where: {
         id: parseInt(id),
       },
-      data: {
-          nombre,
-          descripcion,
-          id_categoria: id_categoriaInt,
-          precio: precioFloat,
-          imagen_default: imgReference,
-          status: status == "true" ? true : false,
-      },
+      data: dataProducto
     });
     res.status(200).json({
       message: "Producto updated successfully",
