@@ -1,4 +1,5 @@
 import prisma from "../libs/client.js";
+import { getImage } from "./helper.controller.js";
 
 export const createShop = async (req,res) => {
     const {
@@ -33,7 +34,7 @@ export const createShop = async (req,res) => {
 export const getShop = async (req,res) => {
     
     try {
-        console.log("el body es ",req.body);
+        // console.log("el body es ",req.body);
         const {id_usuario} = req.body;
         if(!id_usuario) return res.status(400).json("el id del usuario es requerido");
 
@@ -42,7 +43,43 @@ export const getShop = async (req,res) => {
                 id_usuario: parseInt(id_usuario)
             }
         });
-        res.status(200).json(shop);
+        let compras = [];
+        if (shop.length > 0) {
+            compras = await Promise.allSettled(shop.map(async (compra) => {
+                const producto = await prisma.pRODUCTOS.findUnique({
+                    where: {
+                    id: compra.id_producto
+                    }
+                });
+                let imagen = null;
+                if(producto && producto.imagen_default != null){
+                    imagen = getImage(producto.imagen_default);
+                }
+                const ubicacion = await prisma.uBICACIONES_USUARIO.findUnique({
+                    where: {
+                    id: compra.id_ubicacion
+                    }
+                });
+                return {
+                    id: compra.id,
+                    id_usuario: compra.id_usuario,
+                    cantidad: compra.cantidad,
+                    fecha_compra: compra.fecha_compra,
+                    tipo_pago: compra.tipo_pago,
+                    producto : producto.nombre,
+                    ubicacion: ubicacion?.alias,
+                    imagen: imagen
+                }
+            }))
+
+            compras = compras.map((compra) => {
+                if (compra.status === "fulfilled") {
+                    return compra.value;
+                }
+            });
+        }
+        // console.log(compras);
+        res.status(200).json(compras);
     } catch (error) {
         res.status(500).json([error.message]);
     }
