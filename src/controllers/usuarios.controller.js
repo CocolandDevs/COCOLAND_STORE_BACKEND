@@ -256,7 +256,7 @@ export const agregarUbicacion = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json([error.message]);
   }
 };
@@ -308,7 +308,7 @@ export const editarUbicacion = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json([error.message]);
   }
 }
@@ -333,7 +333,7 @@ export const deleteUbicacion = async (req, res) => {
       ubicacion: ubicacionDeleted,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json([error.message]);
   }
 }
@@ -342,7 +342,7 @@ export const deleteUbicacion = async (req, res) => {
 //Perfiles de usuarios 
 export const getPerfil = async (req, res) => {
   try { 
-    console.log(req.body)
+    // console.log(req.body)
     const {id_usuario} = req.body;
     const usuario = await userExist(id_usuario);
     if (!usuario) return res.json(["Usuario no encontrado"]);
@@ -358,7 +358,7 @@ export const getPerfil = async (req, res) => {
 
     res.json(perfil);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json([error.message]);
   }
 }
@@ -435,7 +435,7 @@ export const agregarPerfil = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json([error.message]);
   }
 }
@@ -457,10 +457,10 @@ export const getImagePerfil = async (req, res) => {
       return res.status(400).json(["No image found"]);
     }
     
-    const base64 = await getImage(imagen);
+    const base64 = getImage(imagen);
     return res.status(200).json(base64);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json([error.message]);
   }
 }

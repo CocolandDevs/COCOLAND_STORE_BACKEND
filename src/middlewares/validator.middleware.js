@@ -5,7 +5,7 @@ export const validateschema = (schema) =>(req,res,next) =>{
             req.body.status = req.body?.status === "true" ? true : false;
         }
         
-        console.log(req.body);
+        // console.log(req.body);
         schema.parse(req.body);
         next();
     } catch (error) {

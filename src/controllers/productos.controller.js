@@ -104,7 +104,7 @@ export const createProducto = async (req, res) => {
       producto,
     });
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     res.status(500).json([error.message]);
   }
 };
@@ -157,7 +157,7 @@ export const updateProductos = async (req, res) => {
       producto,
     });
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     res.status(500).json([error.message]);
   }
 };

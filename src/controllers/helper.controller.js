@@ -16,7 +16,7 @@ export const getRolByUser = async (user) => {
         return rol;
         
     } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
         return null;
     }
 }
@@ -47,7 +47,7 @@ export const guardarImagen = async (file, modulo) => {
         // Devolvemos el directorio donde se guardó la imagen
         return `/public/${modulo}/${nombreArchivo}`;
     } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
         return null;
     }
 }
@@ -68,14 +68,14 @@ export const getImage = (path) => {
         let name = pathSplit[pathSplit.length - 1];
         let extension = name.split('.')[1];
 
-        console.log(name,extension);
+        // console.log(name,extension);
 
         let image64 = `data:image/${extension};base64,${image}`;
 
         return image64;
         
     } catch (error) {
-        console.log(error.message);
+        // console.log(error.message);
         return null;
     }
 }

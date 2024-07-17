@@ -101,7 +101,7 @@ export const verifyToken = async (req, res) => {
         const { access_token } = req.cookies;
 
         if (!access_token) {
-            console.log("No token provided");
+            // console.log("No token provided");
             return res.status(401).json({ error: "Unauthorized: No token provided" });
         }
 

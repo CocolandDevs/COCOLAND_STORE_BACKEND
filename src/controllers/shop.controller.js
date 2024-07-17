@@ -31,14 +31,15 @@ export const createShop = async (req,res) => {
 }
 
 export const getShop = async (req,res) => {
-    const {id_user} = req.body;
     
     try {
-        if(!id_user) return res.status(400).json("el id del usuario es requerido");
+        console.log("el body es ",req.body);
+        const {id_usuario} = req.body;
+        if(!id_usuario) return res.status(400).json("el id del usuario es requerido");
 
         const shop = await prisma.cOMPRAS_USUARIO.findMany({
             where: {
-                id_usuario: parseInt(id_user)
+                id_usuario: parseInt(id_usuario)
             }
         });
         res.status(200).json(shop);

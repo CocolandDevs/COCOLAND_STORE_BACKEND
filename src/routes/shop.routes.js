@@ -11,7 +11,7 @@ router.post(
     createShop
 );
 
-router.get(
+router.post(
     "/shop/get",
     getShop
 );
