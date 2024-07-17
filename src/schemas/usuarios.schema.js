@@ -100,18 +100,21 @@ export const perfilUsuarioSchema = z.object({
   nombres : z
    .string({
       required_error: "Nombres es requerido",
+      invalid_type_error: "Nombres debe ser una cadena de texto",
     })
     .max(100,"Nombres no puede tener más de 100 caracteres")
     .optional(),
   apellidos : z
     .string({
       required_error: "Apellidos es requerido",
+      invalid_type_error: "Apellidos debe ser una cadena de texto",
     })
     .max(100,"Apellidos no puede tener más de 100 caracteres")
     .optional(),
   genero : z
     .string({
       required_error: "Género es requerido",
+      invalid_type_error: "Género debe ser una cadena de texto",
     })
     .optional(),
     ubicacion_default: z 

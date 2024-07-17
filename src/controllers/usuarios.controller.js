@@ -382,21 +382,31 @@ export const agregarPerfil = async (req, res) => {
     const usuario = await userExist(id_usuario);
 
     if (!usuario) return res.json(["Usuario no encontrado"]);
+    let perfilData = {};
 
     if (image != null) {
       imgReference = await guardarImagen(image, "Perfiles");
+      perfilData = {
+        id_usuario : parseInt(id_usuario),
+        nombres : nombres ?? null,
+        apellidos : apellidos ?? null,
+        genero : genero ?? null,
+        ubicacion_default : parseInt(ubicacion_default) ?? null,
+        fecha_nacimiento : fechaNacimiento ?? null,
+        telefono : parseInt(telefono) ?? null,
+        imagen : imgReference,
+      }
+    }else{
+      perfilData = {
+        id_usuario : parseInt(id_usuario),
+        nombres : nombres ?? null,
+        apellidos : apellidos ?? null,
+        genero : genero ?? null,
+        ubicacion_default : parseInt(ubicacion_default) ?? null,
+        fecha_nacimiento : fechaNacimiento ?? null,
+        telefono : parseInt(telefono) ?? null,
+      }
     }
-
-    const dataPerfil = {
-      id_usuario : parseInt(id_usuario),
-      nombres : nombres ?? null,
-      apellidos : apellidos ?? null,
-      genero : genero ?? null,
-      ubicacion_default : parseInt(ubicacion_default) ?? null,
-      fecha_nacimiento : fechaNacimiento ?? null,
-      telefono : parseInt(telefono) ?? null,
-      imagen : imgReference ?? null,
-    };
 
     const perfilExist = await prisma.pERFIL_USUARIO.findFirst({
       where: {
@@ -407,14 +417,14 @@ export const agregarPerfil = async (req, res) => {
 
     if (!perfilExist) {
       perfil = await prisma.pERFIL_USUARIO.create({
-        data: dataPerfil,
+        data: perfilData,
       });
     }else{
       perfil = await prisma.pERFIL_USUARIO.update({
         where: {
           id: perfilExist.id,
         },
-        data: dataPerfil,
+        data: perfilData,
       });
     
     }

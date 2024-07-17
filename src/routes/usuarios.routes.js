@@ -56,27 +56,23 @@ router.delete(
 //agregar ubicaciones
 router.get(
   "/usuarios/getUbicaciones",
-  authRequired,
   getUbicaciones
 );
 
 router.post(
   "/usuarios/agregarUbicacion",
-  authRequired,
   validateschema(ubicacionSchema),
   agregarUbicacion
 );
 
 router.put(
   "/usuarios/updateUbicacion",
-  authRequired,
   validateschema(ubicacionSchema),
   editarUbicacion
 );
 
 router.delete(
   "/usuarios/deleteUbicacion",
-  authRequired,
   deleteUbicacion
 );
 
@@ -84,13 +80,11 @@ router.delete(
 //agregarPerfil
 router.post(
   "/usuarios/perfil",
-  authRequired,
   getPerfil
 )
 
 router.post(
   "/usuarios/agregarPerfil",
-  authRequired,
   validateschema(perfilUsuarioSchema),
   agregarPerfil
 );

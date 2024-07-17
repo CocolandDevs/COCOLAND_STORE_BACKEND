@@ -3,7 +3,7 @@ import prisma from '../libs/client.js';
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
 
-export const authRequired = async (req, res, next) => {
+export const authRequired = async (req, res, next,) => {
     const { access_token } = req.cookies;
 
     if (!access_token) {
