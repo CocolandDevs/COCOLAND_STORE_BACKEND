@@ -7,10 +7,8 @@ import {
   updateProductos,
   deleteProducto,
   getImageProducto,
-  getProductosImage
-
-
  } from "../controllers/productos.controller.js";
+ 
 import { authRequired } from "../middlewares/validateToken.js";
 
 
@@ -44,14 +42,4 @@ router.get(
   getImageProducto
 )
 
-router.get(
-  "/productos/getShop/:id",
-  authRequired, 
-  getProductosImage
-)
-
-router.get(
-  "/productos/getShop",
-  getProductosImage
-)
 export default router;

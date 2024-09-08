@@ -70,8 +70,10 @@ model COMPRAS_USUARIO {
   id_usuario Int
   id_producto Int
   id_ubicacion Int
-  cantidad Int
-  fecha_compra DateTime
+  id_metodo_pago Int
+  id_cupon Int?
+  cantidad Int @default(1)
+  fecha_compra DateTime @default(now())
   tipo_pago String @db.VarChar(50)
 }
 
@@ -88,16 +90,10 @@ model CARACTERISTICAS {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(255)
   valor String @db.VarChar(255)
+  id_producto Int 
   status Boolean? @default(true)
 }
 
-
-model CARACTERISTICAS_PRODUCTOS {
-  id Int @id @default(autoincrement())
-  id_producto Int
-  id_caracteristica Int
-  status Boolean? @default(true)
-}
 
 model PRODUCTOS {
   id Int @id @default(autoincrement())
@@ -105,7 +101,42 @@ model PRODUCTOS {
   descripcion String @db.VarChar(255)
   id_categoria Int
   precio Decimal
+  precio_descuento Decimal?
+  en_descuento Boolean? @default(false)
+  stock Int? 
+  id_usuario Int?
   imagen_default String? @db.VarChar(255)
+  status Boolean? @default(true)
+}
+
+model CARRITO_COMPRA {
+  id Int @id @default(autoincrement())
+  id_usuario Int
+  id_producto Int
+  cantidad Int @default(1)
+  status Boolean? @default(true)
+}
+
+model METODOS_PAGO {
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(100)
+  tipo String? @db.VarChar(100)
+  numero_tarjeta String? @db.VarChar(100)
+  fecha_vencimiento DateTime?
+  cvv Int?
+  id_usuario Int
+  id_paypal String? @db.VarChar(100)
+  status Boolean? @default(true)
+}
+
+model CUPONES {
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(100)
+  descripcion String @db.VarChar(255)
+  porcentaje_descuento Float
+  limite_usos Int? @default(1)
+  fecha_inicio DateTime @default(now())
+  fecha_fin DateTime
   status Boolean? @default(true)
 }
 

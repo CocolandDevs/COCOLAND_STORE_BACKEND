@@ -15,27 +15,26 @@ import rolRoutes from "./routes/roles.routes.js";
 import usuarioRoutes from "./routes/usuarios.routes.js";
 import categoriasRoutes from "./routes/categorias.routes.js";
 import productosRoutes from "./routes/productos.routes.js";
-import caracteristicasRoutes from "./routes/caracteristicas.routes.js";
-import shopRoutes from "./routes/shop.routes.js"
+import shopRoutes from "./routes/shop.routes.js";
 
 const App = express();
 
 App.use(morgan("dev"))
-.use(express.json())
-.use(cookieParser())
-.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}))
-.use(formData.parse(options))
-
+  .use(express.json())
+  .use(cookieParser())
+  .use(
+    cors({
+      origin: "http://localhost:5173",
+      credentials: true,
+    })
+  )
+  .use(formData.parse(options));
 
 App.use("/api", authRoutes);
 App.use("/api", rolRoutes);
 App.use("/api", usuarioRoutes);
 App.use("/api", categoriasRoutes);
 App.use("/api", productosRoutes);
-App.use("/api", caracteristicasRoutes);
-App.use("/api",shopRoutes);
+App.use("/api", shopRoutes);
 
 export default App;

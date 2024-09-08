@@ -3,7 +3,7 @@ import prisma from "../libs/client.js";
 import { getImage, guardarImagen } from "./helper.controller.js";
 
 export const getProductos = async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   try {
     if (id) {
       const producto = await prisma.pRODUCTOS.findUnique({
@@ -11,24 +11,52 @@ export const getProductos = async (req, res) => {
           id: parseInt(id),
         },
       });
-      
+
       if (!producto) return res.status(400).json(["Producto not found"]);
+      //añadmos las características a la petición
+      const caracteristicas = await prisma.cARACTERISTICAS.findMany({
+        where: {
+          id_producto: parseInt(id),
+        },
+      });
+      producto.caracteristicas = caracteristicas;
+
+      //añadimos la imagen a la peticón
+      if (producto.imagen_default != null) {
+        producto.imagen_default = getImage(producto.imagen_default);
+      }
 
       return res.status(200).json(producto);
     }
 
-    const producto = await prisma.pRODUCTOS.findMany();
+    const productos = await prisma.pRODUCTOS.findMany();
 
-    return res.status(200).json(producto);
+    if (productos.length > 0) {
+      for (let i = 0; i < productos.length; i++) {
+        const item = productos[i];
+        //agregamos las características a la petición
+        const caracteristicas = await prisma.cARACTERISTICAS.findMany({
+          where: {
+            id_producto: item.id,
+          },
+        });
+        item.caracteristicas = caracteristicas;
+        //agregamos la imagen a la petición
+        if (item.imagen_default != null) {
+          item.imagen_default = getImage(item.imagen_default);
+        }
+      }
+    }
+
+    return res.status(200).json(productos);
   } catch (error) {
     return res.status(500).json([error.message]);
   }
 };
 
-export const getProductosImage = async(req,res) => {
-  const {id} = req.params;
+export const getProductosImage = async (req, res) => {
+  const { id } = req.params;
   try {
-
     if (id) {
       const producto = await prisma.pRODUCTOS.findUnique({
         where: {
@@ -37,7 +65,7 @@ export const getProductosImage = async(req,res) => {
       });
 
       if (!producto) return res.status(400).json(["Producto not found"]);
-      
+
       if (producto.imagen_default != null) {
         producto.imagen_default = getImage(imagen);
       }
@@ -48,8 +76,7 @@ export const getProductosImage = async(req,res) => {
     const productos = await prisma.pRODUCTOS.findMany({
       where: {
         status: true,
-      
-      }
+      },
     });
 
     if (productos.length > 0) {
@@ -61,41 +88,44 @@ export const getProductosImage = async(req,res) => {
     }
 
     return res.status(200).json(productos);
-
-
   } catch (error) {
-      return res.status(500).json([error.message]);
+    return res.status(500).json([error.message]);
   }
-}
+};
 
 export const createProducto = async (req, res) => {
-  const { 
-    nombre ,
-    descripcion,
-    id_categoria,
-    precio,
-    status 
-    } = req.body;
-    // console.log(req);
-    let imagen = req?.files?.imagen_default ?? null;
-    let imgReference = null;
-    let precioFloat = parseFloat(precio);
-    let id_categoriaInt = parseInt(id_categoria);
- 
-  try {
+  const { nombre, descripcion, id_categoria, precio, status, caracteristicas } =
+    req.body;
+  if (caracteristicas) {
+    caracteristicas.forEach(async (caracteristica) => {
+      await prisma.cARACTERISTICAS.create({
+        data: {
+          nombre: caracteristica.nombre,
+          valor: caracteristica.value,
+          id_producto: 1,
+        },
+      });
+    });
+  }
 
+  let imagen = req?.files?.imagen_default ?? null;
+  let imgReference = null;
+  let precioFloat = parseFloat(precio);
+  let id_categoriaInt = parseInt(id_categoria);
+
+  try {
     if (imagen) {
-      imgReference = await guardarImagen(imagen,"Productos");
+      imgReference = await guardarImagen(imagen, "Productos");
     }
 
     const producto = await prisma.pRODUCTOS.create({
       data: {
-      nombre,
-      descripcion,
-      id_categoria: id_categoriaInt,
-      precio: precioFloat,
-      imagen_default: imgReference,
-      status: status == "true" ? true : false,
+        nombre,
+        descripcion,
+        id_categoria: id_categoriaInt,
+        precio: precioFloat,
+        imagen_default: imgReference,
+        status: status == "true" ? true : false,
       },
     });
 
@@ -111,23 +141,17 @@ export const createProducto = async (req, res) => {
 
 export const updateProductos = async (req, res) => {
   const { id } = req.params;
-  const { 
-    nombre ,
-    descripcion,
-    id_categoria,
-    precio,
-    status 
-    } = req.body;
+  const { nombre, descripcion, id_categoria, precio, status } = req.body;
 
-    let imagen = req?.files?.imagen_default ?? null;
-    let imgReference = null;
-    let precioFloat = parseFloat(precio);
-    let id_categoriaInt = parseInt(id_categoria);
-    let dataProducto = {};
+  let imagen = req?.files?.imagen_default ?? null;
+  let imgReference = null;
+  let precioFloat = parseFloat(precio);
+  let id_categoriaInt = parseInt(id_categoria);
+  let dataProducto = {};
 
   try {
     if (imagen) {
-      imgReference = await guardarImagen(imagen,"Productos");
+      imgReference = await guardarImagen(imagen, "Productos");
       dataProducto = {
         nombre,
         descripcion,
@@ -136,21 +160,21 @@ export const updateProductos = async (req, res) => {
         imagen_default: imgReference,
         status: status == "true" ? true : false,
       };
-    }else{
+    } else {
       dataProducto = {
         nombre,
         descripcion,
         id_categoria: id_categoriaInt,
         precio: precioFloat,
         status: status == "true" ? true : false,
-      }
+      };
     }
 
     const producto = await prisma.pRODUCTOS.update({
       where: {
         id: parseInt(id),
       },
-      data: dataProducto
+      data: dataProducto,
     });
     res.status(200).json({
       message: "Producto updated successfully",
@@ -211,4 +235,4 @@ export const getImageProducto = async (req, res) => {
   } catch (error) {
     return res.status(500).json([error.message]);
   }
-}
+};
