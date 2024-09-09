@@ -61,6 +61,45 @@ export const userExist = async (id) => {
     }
 }
 
+export const productoDisponible = async (id) => {
+    try {
+
+        const producto = await prisma.pRODUCTOS.findUnique({
+            where: {
+                id : parseInt(id)
+            }
+        });
+
+        if (!producto) {
+            return {
+                estatus: false,
+                message: "No se encontró el producto",
+                producto: null
+            };
+        }
+
+        if (!producto.status) {
+            return {
+                estatus: false,
+                message: "El producto no está disponible",
+                producto: producto
+            };
+        }
+
+        return {
+            estatus: true,
+            message: "Producto disponible",
+            producto: producto
+        };
+    } catch (error) {
+        return {
+            estatus: false,
+            message: error.message,
+            producto: null
+        };
+    }
+}
+
 export const getImage = (path) => {
     try {
         const image = fs.readFileSync('.' + path,{encoding: 'base64'});

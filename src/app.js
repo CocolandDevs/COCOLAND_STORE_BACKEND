@@ -16,6 +16,7 @@ import usuarioRoutes from "./routes/usuarios.routes.js";
 import categoriasRoutes from "./routes/categorias.routes.js";
 import productosRoutes from "./routes/productos.routes.js";
 import shopRoutes from "./routes/shop.routes.js";
+import MetodoPagoRoutes from "./routes/metodosPago.routes.js";
 
 const App = express();
 
@@ -36,5 +37,6 @@ App.use("/api", usuarioRoutes);
 App.use("/api", categoriasRoutes);
 App.use("/api", productosRoutes);
 App.use("/api", shopRoutes);
+App.use("/api", MetodoPagoRoutes);
 
 export default App;
