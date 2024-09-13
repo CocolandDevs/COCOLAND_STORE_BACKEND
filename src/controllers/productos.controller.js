@@ -23,7 +23,7 @@ export const getProductos = async (req, res) => {
 
       //añadimos la imagen a la peticón
       if (producto.imagen_default != null) {
-        producto.imagen_default = getImage(producto.imagen_default);
+        producto.imagen = getImage(producto.imagen_default);
       }
 
       return res.status(200).json(producto);
@@ -34,6 +34,12 @@ export const getProductos = async (req, res) => {
     if (productos.length > 0) {
       for (let i = 0; i < productos.length; i++) {
         const item = productos[i];
+
+        const categoria = await prisma.cATEGORIAS.findUnique({
+          where: {
+            id: item.id_categoria,
+          }
+        })
         //agregamos las características a la petición
         const caracteristicas = await prisma.cARACTERISTICAS.findMany({
           where: {
@@ -41,9 +47,10 @@ export const getProductos = async (req, res) => {
           },
         });
         item.caracteristicas = caracteristicas;
+        item.categoria = categoria.nombre;
         //agregamos la imagen a la petición
         if (item.imagen_default != null) {
-          item.imagen_default = getImage(item.imagen_default);
+          item.imagen = getImage(item.imagen_default);
         }
       }
     }
@@ -94,7 +101,7 @@ export const getProductosImage = async (req, res) => {
 };
 
 export const createProducto = async (req, res) => {
-  const { nombre, descripcion, id_categoria, precio, status, caracteristicas } =
+  const { nombre, descripcion, id_categoria, precio, status, caracteristicas, precio_descuento, en_descuento, stock } =
     req.body;
   if (caracteristicas) {
     caracteristicas.forEach(async (caracteristica) => {
@@ -125,6 +132,9 @@ export const createProducto = async (req, res) => {
         id_categoria: id_categoriaInt,
         precio: precioFloat,
         imagen_default: imgReference,
+        precio_descuento: precio_descuento ? parseFloat(precio_descuento) : null,
+        en_descuento: en_descuento == "true" ? true : false,
+        stock: stock ? parseInt(stock) : null,
         status: status == "true" ? true : false,
       },
     });
@@ -141,7 +151,7 @@ export const createProducto = async (req, res) => {
 
 export const updateProductos = async (req, res) => {
   const { id } = req.params;
-  const { nombre, descripcion, id_categoria, precio, status } = req.body;
+  const { nombre, descripcion, id_categoria, precio, status, caracteristicas, precio_descuento, en_descuento, stock } = req.body;
 
   let imagen = req?.files?.imagen_default ?? null;
   let imgReference = null;
@@ -158,6 +168,9 @@ export const updateProductos = async (req, res) => {
         id_categoria: id_categoriaInt,
         precio: precioFloat,
         imagen_default: imgReference,
+        precio_descuento: precio_descuento ? parseFloat(precio_descuento) : null,
+        en_descuento: en_descuento == "true" ? true : false,
+        stock: stock ? parseInt(stock) : null,
         status: status == "true" ? true : false,
       };
     } else {
@@ -166,6 +179,9 @@ export const updateProductos = async (req, res) => {
         descripcion,
         id_categoria: id_categoriaInt,
         precio: precioFloat,
+        precio_descuento: precio_descuento ? parseFloat(precio_descuento) : null,
+        en_descuento: en_descuento == "true" ? true : false,
+        stock: stock ? parseInt(stock) : null,
         status: status == "true" ? true : false,
       };
     }
