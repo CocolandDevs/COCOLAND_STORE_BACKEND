@@ -1,4 +1,4 @@
-import { date } from "zod";
+import { date, object } from "zod";
 import prisma from "../libs/client.js";
 import { getImage, guardarImagen } from "./helper.controller.js";
 
@@ -101,19 +101,7 @@ export const getProductosImage = async (req, res) => {
 };
 
 export const createProducto = async (req, res) => {
-  const { nombre, descripcion, id_categoria, precio, status, caracteristicas, precio_descuento, en_descuento, stock } =
-    req.body;
-  if (caracteristicas) {
-    caracteristicas.forEach(async (caracteristica) => {
-      await prisma.cARACTERISTICAS.create({
-        data: {
-          nombre: caracteristica.nombre,
-          valor: caracteristica.value,
-          id_producto: 1,
-        },
-      });
-    });
-  }
+  const { nombre, descripcion, id_categoria, precio, status, caracteristicas, precio_descuento, en_descuento, stock } = req.body;
 
   let imagen = req?.files?.imagen_default ?? null;
   let imgReference = null;
@@ -138,6 +126,20 @@ export const createProducto = async (req, res) => {
         status: status == "true" ? true : false,
       },
     });
+
+    if (caracteristicas) {
+      let arrayCarateristicas = JSON.parse(caracteristicas);
+      
+      arrayCarateristicas.forEach(async (caracteristica) => {
+        await prisma.cARACTERISTICAS.create({
+          data: {
+            nombre: caracteristica.nombre,
+            valor: caracteristica.valor,
+            id_producto: producto.id,
+          },
+        });
+      });
+    }
 
     res.status(200).json({
       message: "Producto created successfully",
@@ -192,6 +194,28 @@ export const updateProductos = async (req, res) => {
       },
       data: dataProducto,
     });
+
+    if (caracteristicas) {
+      let updateCaracteristicas = JSON.parse(caracteristicas);
+
+      // First, delete existing characteristics for the product
+      await prisma.cARACTERISTICAS.deleteMany({
+        where: {
+          id_producto: parseInt(id),
+        },
+      });
+
+      updateCaracteristicas.forEach(async (caracteristica) => {
+        await prisma.cARACTERISTICAS.create({
+          data: {
+            nombre: caracteristica.nombre,
+            valor: caracteristica.valor,
+            id_producto: producto.id,
+          },
+        });
+      });
+    }
+    
     res.status(200).json({
       message: "Producto updated successfully",
       producto,
