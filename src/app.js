@@ -4,12 +4,14 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import formData from "express-form-data";
 import os from "os";
+import { engine } from 'express-handlebars';
 
 const options = {
   uploadDir: os.tmpdir(),
   autoClean: true,
 };
-//importamos las rutas
+
+// Importamos las rutas
 import authRoutes from "./routes/auth.routes.js";
 import rolRoutes from "./routes/roles.routes.js";
 import usuarioRoutes from "./routes/usuarios.routes.js";
@@ -17,6 +19,7 @@ import categoriasRoutes from "./routes/categorias.routes.js";
 import productosRoutes from "./routes/productos.routes.js";
 import shopRoutes from "./routes/shop.routes.js";
 import MetodoPagoRoutes from "./routes/metodosPago.routes.js";
+import path from "path";
 
 const App = express();
 
@@ -31,6 +34,13 @@ App.use(morgan("dev"))
   )
   .use(formData.parse(options));
 
+// Configuración de Handlebars
+App.engine('handlebars', engine());
+App.set('view engine', 'handlebars');
+
+App.set('views', path.join(path.resolve(), 'src', 'views'));
+
+// Uso de las rutas
 App.use("/api", authRoutes);
 App.use("/api", rolRoutes);
 App.use("/api", usuarioRoutes);

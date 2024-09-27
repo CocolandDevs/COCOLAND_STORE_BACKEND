@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { hashPasswordTest, login, logout, register, verifyToken } from "../controllers/auth.controller.js";
+import { hashPasswordTest, login, logout, register, verifyToken,sendMail } from "../controllers/auth.controller.js";
 import { validateschema } from "../middlewares/validator.middleware.js";
 import { loginSchema, registerSchema } from "../schemas/auth.schema.js";
 
@@ -14,6 +14,7 @@ router.get("/auth/verify" , verifyToken );
 
 //rutas para pruebas
 router.post("/auth/passwordTest",hashPasswordTest);
+router.get("/auth/sendMail",sendMail);
 
 
 export default router;

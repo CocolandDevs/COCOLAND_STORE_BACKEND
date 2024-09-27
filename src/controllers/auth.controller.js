@@ -3,6 +3,11 @@ import { createAccessToken } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken';
 import { comparePassword, hashPassword } from '../libs/bycript.js';
 import { getRolByUser } from './helper.controller.js';
+import nodemailer from '../libs/nodemailer.js';
+import fs from 'fs';
+import {getImage} from './helper.controller.js';
+
+
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
 
@@ -143,5 +148,38 @@ export const hashPasswordTest = async (req,res) => {
         });
     } catch (error) {
         res.status(500).json([error.message]);
+    }
+}
+
+export const sendMail = async (req, res) => {
+    try {
+        //para usar fs usar ruta tomando como referencia la raiz del proyecto
+        let imageAttachment = await getImage('/src/resources/img/logo.png');
+
+        const template = await new Promise((resolve, reject) => {
+            res.render('home', { logo: '/src/resources/img/logo.png' }, (err, html) => { 
+            if (err) {
+                reject(err);
+            } else {
+                resolve(html);
+            }
+            });
+        });
+
+        nodemailer.sendMail({
+            from: process.env.SMTP_USER,
+            to: "leonelrosado2407@gmail.com",
+            subject: "Test",
+            html: template,
+
+        }, (error, info) => {
+            if (error) {
+                res.status(500).json({ error: error.message });
+            } else {
+                res.status(200).json({ message: "Email sent", info });
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 }
