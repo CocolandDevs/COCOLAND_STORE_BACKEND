@@ -20,6 +20,26 @@ model USUARIOS {
   name    String?  @db.VarChar(100)
   password String   @db.VarChar(255)
   status  Boolean?  @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
+//tabla de Roles
+model ROLES {
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(50)
+  status Boolean? @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
+//relacion entre usuarios y roles
+model USUARIOS_ROLES {
+  id Int @id @default(autoincrement())
+  id_usuario Int
+  id_rol Int
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
 //Perfil de usuario
@@ -33,19 +53,8 @@ model PERFIL_USUARIO{
   fecha_nacimiento DateTime?
   telefono Int? 
   imagen String? @db.VarChar(255)
-}
-//tabla de Roles
-model ROLES {
-  id Int @id @default(autoincrement())
-  nombre String @db.VarChar(50)
-  status Boolean? @default(true)
-}
-
-//relacion entre usuarios y roles
-model USUARIOS_ROLES {
-  id Int @id @default(autoincrement())
-  id_usuario Int
-  id_rol Int
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
 //ubicaciones de envio de un usuario
@@ -62,19 +71,34 @@ model UBICACIONES_USUARIO {
   alias String? @db.VarChar(50)
   numero_telefonico Int
   status Boolean? @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
-// Historial de compras de un usuario
+// tabla de compras 
 model COMPRAS_USUARIO {
   id Int @id @default(autoincrement())
   id_usuario Int
-  id_producto Int
   id_ubicacion Int
   id_metodo_pago Int
   id_cupon Int?
-  cantidad Int @default(1)
   fecha_compra DateTime @default(now())
+  subtotal Decimal
+  total Decimal
   tipo_pago String @db.VarChar(50)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
+//detalle de productos en la compra
+model productos_compra {
+  id Int @id @default(autoincrement())
+  id_compra Int
+  id_producto Int
+  cantidad Int @default(1)
+  precio Decimal
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
 //CATEGORIAS DE PRODUCTOS
@@ -82,6 +106,8 @@ model CATEGORIAS {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(100)
   status Boolean? @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
 
@@ -92,9 +118,11 @@ model CARACTERISTICAS {
   valor String @db.VarChar(255)
   id_producto Int 
   status Boolean? @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
-
+//productos
 model PRODUCTOS {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(255)
@@ -107,16 +135,32 @@ model PRODUCTOS {
   id_usuario Int?
   imagen_default String? @db.VarChar(255)
   status Boolean? @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
+//Carrito de compra
 model CARRITO_COMPRA {
   id Int @id @default(autoincrement())
   id_usuario Int
-  id_producto Int
-  cantidad Int @default(1)
   status Boolean? @default(true)
+  subtotal Decimal
+  total Decimal
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
+//productos en el carrito
+model carrito_productos {
+  id Int @id @default(autoincrement())
+  id_carrito Int
+  id_producto Int
+  cantidad Int @default(1)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
+//Métodos de pago
 model METODOS_PAGO {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(100)
@@ -127,8 +171,11 @@ model METODOS_PAGO {
   id_usuario Int
   id_paypal String? @db.VarChar(100)
   status Boolean? @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
+//cupones de descuento
 model CUPONES {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(100)
@@ -138,7 +185,19 @@ model CUPONES {
   fecha_inicio DateTime @default(now())
   fecha_fin DateTime
   status Boolean? @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
 }
 
+//detalle de cupones usados
+model cupon_uso {
+  id Int @id @default(autoincrement())
+  id_usuario Int
+  id_cupon Int
+  id_compra Int
+  fecha_uso DateTime @default(now())
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
 
 
