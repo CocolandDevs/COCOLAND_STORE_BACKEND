@@ -25,16 +25,20 @@ async function main() {
     await prisma.cARACTERISTICAS.deleteMany({});
     await prisma.pRODUCTOS.deleteMany({});
     await prisma.cATEGORIAS.deleteMany({});
+    await prisma.cUPONES.deleteMany({});
+    await prisma.cupon_uso.deleteMany({});
 
     await createUsers();
     await createCategories();
     await createProductos();
+    await createCupones();
 
     //recuperamos los usuarios creados
     const usuarios = (await prisma.uSUARIOS.findMany({})).map(usuario => usuario.id);
     //recuperamos los productos creados
     const productos = (await prisma.pRODUCTOS.findMany({})).map(producto => producto.id);
     const productosObj = await prisma.pRODUCTOS.findMany({});
+    
 
     usuarios.forEach(async (usuario) => {
         //creamos las compras de los usuarios
@@ -109,6 +113,52 @@ const createCategories = async () => {
             },
             {
                 nombre: 'Otros',
+                created_at: faker.date.past({years:5}),
+                updated_at: faker.date.recent()
+            }
+        ]
+    })
+}
+const createCupones = async () => {
+    const cupones = await prisma.cUPONES.createMany({
+        data: [
+            {
+                nombre: 'CHICHAN',
+                descripcion:'CUPON ANIVERSARIO DE CHICHAN',
+                porcentaje_descuento:20,
+                limite_usos:1000,
+                fecha_inicio:faker.date.past({years:5}),
+                fecha_fin:faker.date.recent(),
+                created_at: faker.date.past({years:5}),
+                updated_at: faker.date.recent()
+            },
+            {
+                nombre: 'TCM',
+                descripcion:'CUPON DE LANZAMIENTO DE TCM',
+                porcentaje_descuento:10,
+                limite_usos:1000,
+                fecha_inicio:faker.date.past({years:5}),
+                fecha_fin:faker.date.recent(),
+                created_at: faker.date.past({years:5}),
+                updated_at: faker.date.recent()
+            },
+            {
+                nombre: 'BODOKE',
+                descripcion:'CUPON COLOBORACON CON BODOKE',
+                porcentaje_descuento:5,
+                limite_usos:1000,
+                fecha_inicio:faker.date.past({years:5}),
+                fecha_fin:faker.date.recent(),
+                created_at: faker.date.past({years:5}),
+                updated_at: faker.date.recent()
+            },
+            {
+                nombre: 'VERANO',
+                descripcion:'CUPON REVAJAS DE VERANO',
+                porcentaje_descuento:40,
+                limite_usos:1500,
+                fecha_inicio:faker.date.past({years:5}),
+                fecha_fin:faker.date.recent(),
                 created_at: faker.date.past({years:5}),
                 updated_at: faker.date.recent()
             }
