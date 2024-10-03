@@ -5,7 +5,7 @@ import { comparePassword, hashPassword } from '../libs/bycript.js';
 import { getRolByUser } from './helper.controller.js';
 import nodemailer from '../libs/nodemailer.js';
 import fs from 'fs';
-import {getImage} from './helper.controller.js';
+import path from 'path';
 
 
 
@@ -153,11 +153,43 @@ export const hashPasswordTest = async (req,res) => {
 
 export const sendMail = async (req, res) => {
     try {
-        //para usar fs usar ruta tomando como referencia la raiz del proyecto
-        let imageAttachment = await getImage('/src/resources/img/logo.png');
+        let images = [];
+        const productos = await prisma.pRODUCTOS.findMany({
+            where:{
+                imagen_default: {
+                    not: null
+                }
+            }
+        });
+
+        productos.forEach(producto => {
+            let obj= {
+                id : producto.id,
+                nombre : producto.nombre,
+                precio : producto.precio,
+                descripcion : producto.descripcion,
+                imagen_default : producto.imagen_default
+            }
+
+            images.push(obj);
+        }); 
+
+        const imagesAttachments  = images.map((imagen) => {
+            return {
+                filename: imagen.nombre,
+                content: fs.createReadStream(path.join(path.resolve(), imagen.imagen_default)),
+                nombreProducto: imagen.nombre,
+                precio: imagen.precio,
+                descripcion: imagen.descripcion,
+                cid: `image${imagen.id}@cid`
+            }
+        })
+
+        
+        let logo =  fs.createReadStream(path.join(path.resolve(), '/src/resources/img/logo.png'));
 
         const template = await new Promise((resolve, reject) => {
-            res.render('home', { logo: '/src/resources/img/logo.png' }, (err, html) => { 
+            res.render('home', { productos:imagesAttachments, logo }, (err, html) => { 
             if (err) {
                 reject(err);
             } else {
@@ -165,12 +197,16 @@ export const sendMail = async (req, res) => {
             }
             });
         });
+        
+        // return res.send(template);
 
         nodemailer.sendMail({
             from: process.env.SMTP_USER,
-            to: "leonelrosado2407@gmail.com",
+            // to: "leonelrosado2407@gmail.com",
+            to: "clarissa27segovia@gmail.com",
             subject: "Test",
             html: template,
+            attachments: imagesAttachments.concat({ filename: 'logo.png', content: logo, cid: `logo@cid` })
 
         }, (error, info) => {
             if (error) {
