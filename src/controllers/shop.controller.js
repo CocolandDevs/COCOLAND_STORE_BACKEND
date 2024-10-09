@@ -1,6 +1,7 @@
 import prisma from "../libs/client.js";
 import { getImage } from "./helper.controller.js";
 import { userExist, productoDisponible } from "./helper.controller.js";
+import { stripe } from "../libs/stripe.js";
 
 export const createShop = async (req, res) => {
   const {

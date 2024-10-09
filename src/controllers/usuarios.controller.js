@@ -190,18 +190,18 @@ export const deleteUsuario = async (req, res) => {
 //Ubicaciones de usuarios
 export const getUbicaciones = async (req, res) => {
   try {
-    const { id_usuario } = req.body;
+    const { id } = req.params;
 
-    const usuario = await userExist(id_usuario);
+    const usuario = await userExist(id);
     if (!usuario) return res.json(["Usuario no encontrado"]);
 
     const ubicaciones = await prisma.uBICACIONES_USUARIO.findMany({
       where: {
-        id_usuario: parseInt(id_usuario),
+        id_usuario: parseInt(id),
         status: true,
       },
     });
-
+    
     if (ubicaciones.length !== 0) {
       res.json(ubicaciones);
     } else {

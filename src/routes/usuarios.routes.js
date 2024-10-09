@@ -55,7 +55,7 @@ router.delete(
 
 //agregar ubicaciones
 router.get(
-  "/usuarios/getUbicaciones",
+  "/usuarios/getUbicaciones/:id",
   getUbicaciones
 );
 
