@@ -1,5 +1,3 @@
--- Active: 1716360656951@@127.0.0.1@3306@cocoland_store
-
 DROP PROCEDURE IF EXISTS sp_reset_bd;
 
 CREATE Procedure sp_reset_bd()
@@ -14,6 +12,10 @@ BEGIN
     TRUNCATE TABLE categorias;
     TRUNCATE TABLE caracteristicas;
     TRUNCATE TABLE cupones;
+    TRUNCATE TABLE cupon_uso;
+    TRUNCATE TABLE productos_compra;
+    TRUNCATE TABLE carrito_compra;
+    TRUNCATE TABLE carrito_productos;
     INSERT into roles (nombre,status) VALUES
     ('Administrador',1),
     ('Usuario',1),

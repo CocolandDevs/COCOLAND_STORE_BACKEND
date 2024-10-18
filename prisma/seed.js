@@ -316,14 +316,14 @@ const createUsers = async () => {
                 data: {
                     id_usuario: usuario.id,
                     direccion: faker.location.streetAddress(),
-                    codigo_postal: parseInt(faker.location.zipCode()),
+                    complemento: faker.location.secondaryAddress(),
+                    codigo_postal: faker.location.zipCode(),
+                    tipo_direccion: faker.helpers.arrayElement(['Casa', 'Oficina', 'Departamento']),
+                    alias: faker.helpers.arrayElement(['Casa', 'Trabajo', 'Otro']),
                     ciudad: faker.location.city(),
                     estado: faker.location.state(),
                     pais: faker.location.country(),
-                    numero_interior: faker.helpers.fromRegExp("[0-9]{3}"),
-                    numero_exterior: faker.helpers.fromRegExp("[0-9]{3}"),
-                    alias: faker.helpers.arrayElement(['Casa', 'Trabajo', 'Otro']),
-                    numero_telefonico: perfil.telefono,
+                    numero_telefonico: faker.phone.number({style:'national'}),
                     created_at: faker.date.past({years:5}),
                     updated_at: faker.date.recent()
                 }

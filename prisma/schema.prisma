@@ -19,6 +19,7 @@ model USUARIOS {
   email   String   @unique @db.VarChar(255)
   name    String?  @db.VarChar(100)
   password String   @db.VarChar(255)
+  is_stripe_customer String? @db.VarChar(255)
   status  Boolean?  @default(true)
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
@@ -59,20 +60,20 @@ model PERFIL_USUARIO{
 
 //ubicaciones de envio de un usuario
 model UBICACIONES_USUARIO {
-  id Int @id @default(autoincrement())
-  id_usuario Int
-  direccion String @db.VarChar(255)
-  codigo_postal Int
-  ciudad String @db.VarChar(100)
-  estado String @db.VarChar(100)
-  pais String @db.VarChar(100)
-  numero_interior String? @db.VarChar(50)
-  numero_exterior String? @db.VarChar(50)
-  alias String? @db.VarChar(50)
-  numero_telefonico Int
-  status Boolean? @default(true)
-  created_at DateTime? @default(now())
-  updated_at DateTime? @updatedAt
+  id               Int      @id @default(autoincrement())
+  id_usuario       Int
+  direccion        String   @db.VarChar(255) 
+  complemento      String?  @db.VarChar(255)
+  codigo_postal    String   @db.VarChar(20) 
+  ciudad           String   @db.VarChar(100)
+  estado           String   @db.VarChar(100)
+  pais             String   @db.VarChar(100)
+  numero_telefonico String?  @db.VarChar(20)
+  status           Boolean? @default(true)
+  created_at       DateTime? @default(now())
+  updated_at       DateTime? @updatedAt
+  tipo_direccion  String? @db.VarChar(50)
+  alias           String? @db.VarChar(100)
 }
 
 // tabla de compras 
@@ -170,6 +171,7 @@ model METODOS_PAGO {
   cvv Int?
   id_usuario Int
   id_paypal String? @db.VarChar(100)
+  id_stripe String? @db.VarChar(255)
   status Boolean? @default(true)
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
