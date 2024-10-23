@@ -1,5 +1,6 @@
-DROP PROCEDURE IF EXISTS sp_reset_bd;
+use cocoland_store;
 
+DROP PROCEDURE IF EXISTS sp_reset_bd;
 CREATE Procedure sp_reset_bd()
 BEGIN
     TRUNCATE TABLE perfil_usuario;
