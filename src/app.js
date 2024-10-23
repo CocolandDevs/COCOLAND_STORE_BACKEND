@@ -19,6 +19,7 @@ import categoriasRoutes from "./routes/categorias.routes.js";
 import productosRoutes from "./routes/productos.routes.js";
 import shopRoutes from "./routes/shop.routes.js";
 import MetodoPagoRoutes from "./routes/metodosPago.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 import path from "path";
 
 const App = express();
@@ -48,5 +49,9 @@ App.use("/api", categoriasRoutes);
 App.use("/api", productosRoutes);
 App.use("/api", shopRoutes);
 App.use("/api", MetodoPagoRoutes);
+App.use("/api", dashboardRoutes);
+
+//uso de api dashboard
+
 
 export default App;
