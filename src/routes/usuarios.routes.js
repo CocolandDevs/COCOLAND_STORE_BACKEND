@@ -66,13 +66,13 @@ router.post(
 );
 
 router.put(
-  "/usuarios/updateUbicacion",
+  "/usuarios/updateUbicacion/:id",
   validateschema(ubicacionSchema),
   editarUbicacion
 );
 
 router.delete(
-  "/usuarios/deleteUbicacion",
+  "/usuarios/deleteUbicacion/:id",
   deleteUbicacion
 );
 

@@ -226,6 +226,7 @@ export const agregarUbicacion = async (req, res) => {
       alias,
       numero_telefonico,
       status,
+      tipo_direccion,
     } = req.body;
 
     const usuario = await userExist(id_usuario);
@@ -235,7 +236,7 @@ export const agregarUbicacion = async (req, res) => {
       data: {
         id_usuario : parseInt(id_usuario),
         direccion,
-        codigo_postal : parseInt(codigo_postal),
+        codigo_postal : codigo_postal,
         ciudad,
         estado,
         pais,
@@ -243,6 +244,7 @@ export const agregarUbicacion = async (req, res) => {
         alias,
         numero_telefonico : numero_telefonico,
         status,
+        tipo_direccion: tipo_direccion,
       },
     });
     
@@ -254,7 +256,7 @@ export const agregarUbicacion = async (req, res) => {
     });
 
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     res.json([error.message]);
   }
 };
@@ -262,19 +264,20 @@ export const agregarUbicacion = async (req, res) => {
 export const editarUbicacion = async (req, res) => {
   try {
     const {
-      id,
       id_usuario,
       direccion,
       codigo_postal,
       ciudad,
+      complemento,
       estado,
       pais,
-      numero_interior,
-      numero_exterior,
       alias,
       numero_telefonico,
       status,
+      tipo_direccion,
     } = req.body;
+
+    const { id } = req.params;
 
     const usuario = await userExist(id_usuario);
     if (!usuario) return res.json(["Usuario no encontrado"]);
@@ -286,15 +289,15 @@ export const editarUbicacion = async (req, res) => {
       data: {
         id_usuario : parseInt(id_usuario),
         direccion,
-        codigo_postal : parseInt(codigo_postal),
+        codigo_postal : codigo_postal,
         ciudad,
         estado,
         pais,
-        numero_interior,
-        numero_exterior,
+        complemento,
         alias,
-        numero_telefonico : parseInt(numero_telefonico),
+        numero_telefonico : numero_telefonico,
         status,
+        tipo_direccion: tipo_direccion,
       },
     });
 
@@ -313,7 +316,7 @@ export const editarUbicacion = async (req, res) => {
 
 export const deleteUbicacion = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
 
     const ubicacionDeleted = await prisma.uBICACIONES_USUARIO.update({
       where: {
