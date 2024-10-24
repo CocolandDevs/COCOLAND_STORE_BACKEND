@@ -149,7 +149,7 @@ model CARRITO_COMPRA {
   total Decimal
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
-}
+} 
 
 //productos en el carrito
 model carrito_productos {
