@@ -20,6 +20,8 @@ import productosRoutes from "./routes/productos.routes.js";
 import shopRoutes from "./routes/shop.routes.js";
 import MetodoPagoRoutes from "./routes/metodosPago.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import cuponRoutes from "./routes/Admin/cupones.routes.js";
+
 import path from "path";
 
 const App = express();
@@ -29,7 +31,9 @@ App.use(morgan("dev"))
   .use(cookieParser())
   .use(
     cors({
+      //cambiar por la ip del servidor
       origin: "http://localhost:5173",
+      // origin: "http://172.23.176.1:5173",
       credentials: true,
     })
   )
@@ -50,6 +54,7 @@ App.use("/api", productosRoutes);
 App.use("/api", shopRoutes);
 App.use("/api", MetodoPagoRoutes);
 App.use("/api", dashboardRoutes);
+App.use("/api", cuponRoutes);
 
 //uso de api dashboard
 

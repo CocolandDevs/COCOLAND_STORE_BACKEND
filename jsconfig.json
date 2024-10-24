@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "baseUrl": "./",
+      "paths": {
+        "@controller/*": ["src/controllers/*"],
+        "@schema/*": ["src/schemas/*"]
+      }
+    }
+  }
+  

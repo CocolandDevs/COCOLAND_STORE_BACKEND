@@ -1,6 +1,0 @@
-NOTA IMPORTANTE
-
-el archivo index.js no se toca 
-el archivo app.js es en donde importaremos nuestras rutas para poder usarlas.
-
-1. ruta
