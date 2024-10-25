@@ -61,6 +61,17 @@ export const userExist = async (id) => {
     }
 }
 
+export const carritoExist = async (id) => {
+    try {
+        const carrito = await prisma.cARRITO_COMPRA.findUnique({ where: { id : parseInt(id) } });
+        return carrito ? carrito : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+
+
 export const productoDisponible = async (id) => {
     try {
 
