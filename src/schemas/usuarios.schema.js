@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const validationId = [
-  z.string().regex(/^\d+$/),
+  z.string(),
   z.number().int().positive(),
 ];
 
@@ -148,6 +148,12 @@ export const ubicacionSchema = z.object({
     .string({
       required_error: "La dirección es requerida",
     }),
+    complemento : z
+    .string({
+      required_error: "La dirección es requerida",
+    })
+    .max(100,"Complemento no puede tener más de 100 caracteres")
+    .optional(),
   codigo_postal : z
     .union([...validationId, z.string()],{
       invalid_type_error: "Código postal debe ser un número entero positivo",
@@ -165,21 +171,14 @@ export const ubicacionSchema = z.object({
     .string({
       required_error: "El país es requerido",
     }),
-  numero_interior: z
-    .string({
-      required_error: "El número interior es requerido",
-    })
-    .optional(),
-  numero_exterior: z
-    .string({
-      required_error: "El número exterior es requerido",
-    })
-    .optional(),
   alias: z
     .string({
       required_error: "El alias es requerido",
     })
     .optional(),
+  tipo_direccion: z.string({
+    required_error: "El tipo de dirección es requerido",
+  }),
   numero_telefonico: z
     .union([...validationId],{
       invalid_type_error: "Número telefónico debe ser un número entero positivo",
