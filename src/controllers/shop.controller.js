@@ -125,7 +125,7 @@ export const getShop = async (req, res) => {
 
 export const addCart = async (req, res) => {
   try {
-    const { id_usuario, id_producto, id_carrito } = req.body;
+    const { id_usuario, id_producto } = req.body;
 
     // 1. Validar si el usuario existe usando tu helper `userExist`
     const user = await userExist(id_usuario);
@@ -135,30 +135,21 @@ export const addCart = async (req, res) => {
     const { estatus, producto, message } = await productoDisponible(id_producto);
     if (!estatus) return res.status(400).json({ message });
 
-    // 3. Verificar si se ha proporcionado un ID de carrito
-    let carrito;
-    if (id_carrito) {
-      // Si se proporciona un ID de carrito, buscar ese carrito
-      carrito = await prisma.CARRITO_COMPRA.findUnique({
-        where: { id: parseInt(id_carrito) },
+    // 3. Buscar o crear un carrito para el usuario
+    let carrito = await prisma.CARRITO_COMPRA.findFirst({
+      where: { id_usuario: parseInt(id_usuario) },
+    });
+
+    if (!carrito) {
+      // Si no existe un carrito, crear uno nuevo
+      carrito = await prisma.CARRITO_COMPRA.create({
+        data: {
+          id_usuario: parseInt(id_usuario),
+          status: true,
+          subtotal: 0,
+          total: 0,
+        },
       });
-      if (!carrito) {
-        return res.status(400).json({ message: "El carrito no existe" });
-      }
-    } else {
-      // Si no se proporciona un ID de carrito, buscar o crear uno para el usuario
-      carrito = await carritoExist(id_usuario);
-      if (!carrito) {
-        // Si no existe un carrito, crear uno nuevo
-        carrito = await prisma.CARRITO_COMPRA.create({
-          data: {
-            id_usuario: parseInt(id_usuario),
-            status: true,
-            subtotal: 0,
-            total: 0,
-          },
-        });
-      }
     }
 
     // 4. Verificar si el producto ya está en el carrito
@@ -189,41 +180,40 @@ export const addCart = async (req, res) => {
     }
 
     // 6. Recalcular el subtotal y total
-const productosEnCarrito = await prisma.carrito_productos.findMany({
-  where: { id_carrito: carrito.id },
-});
+    const productosEnCarrito = await prisma.carrito_productos.findMany({
+      where: { id_carrito: carrito.id },
+    });
 
-let subtotal = 0;
+    let subtotal = 0;
 
-for (const item of productosEnCarrito) {
-  // Obtener el producto de la tabla PRODUCTOS
-  const producto = await prisma.PRODUCTOS.findUnique({
-    where: { id: item.id_producto },
-  });
+    for (const item of productosEnCarrito) {
+      // Obtener el producto de la tabla PRODUCTOS
+      const producto = await prisma.PRODUCTOS.findUnique({
+        where: { id: item.id_producto },
+      });
 
-  // Verificar si el producto tiene descuento activo y calcular el precio final
-  let precioFinal;
-  if (producto.en_descuento && producto.precio_descuento) {
-    precioFinal = parseFloat(producto.precio_descuento);
-  } else {
-    precioFinal = parseFloat(producto.precio);
-  }
+      // Verificar si el producto tiene descuento activo y calcular el precio final
+      let precioFinal;
+      if (producto.en_descuento && producto.precio_descuento) {
+        precioFinal = parseFloat(producto.precio_descuento);
+      } else {
+        precioFinal = parseFloat(producto.precio);
+      }
 
-  // Calcular el subtotal sumando (precio * cantidad) por cada producto en el carrito
-  subtotal += item.cantidad * precioFinal;
-}
+      // Calcular el subtotal sumando (precio * cantidad) por cada producto en el carrito
+      subtotal += item.cantidad * precioFinal;
+    }
 
-const total = subtotal; // Total será igual al subtotal
+    const total = subtotal; // Total será igual al subtotal
 
-// 7. Actualizar el carrito con el nuevo subtotal y total
-await prisma.CARRITO_COMPRA.update({
-  where: { id: carrito.id },
-  data: {
-    subtotal: subtotal,
-    total: total,
-  },
-});
-
+    // 7. Actualizar el carrito con el nuevo subtotal y total
+    await prisma.CARRITO_COMPRA.update({
+      where: { id: carrito.id },
+      data: {
+        subtotal: subtotal,
+        total: total,
+      },
+    });
 
     // 8. Responder con el carrito actualizado
     res.status(200).json({
@@ -234,6 +224,7 @@ await prisma.CARRITO_COMPRA.update({
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // export const getCart = async (req, res) => {
 //   try {
