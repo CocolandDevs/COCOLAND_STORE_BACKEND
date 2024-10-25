@@ -292,27 +292,29 @@ await prisma.CARRITO_COMPRA.update({
 
 export const getCart = async (req, res) => {
   try {
-    const { id_usuario, id_carrito } = req.body;
+    const { id_usuario } = req.body;
 
     // Verificar si se envió el id_usuario
     if (!id_usuario) return res.status(400).json("El id del usuario es requerido");
 
-    // Verificar si el id_carrito es vacío o no
-    if (id_carrito === "") return res.status(200).json({ carrito: null, productos: [] });
-
     const user = userExist(id_usuario);
     if (!user) return res.status(400).json("El usuario no existe");
 
-    const carrito = await prisma.CARRITO_COMPRA.findUnique({
-      where: { id: parseInt(id_carrito) },
+    // Buscar el carrito del usuario
+    const carrito = await prisma.CARRITO_COMPRA.findFirst({
+      where: { id_usuario: parseInt(id_usuario) },
     });
-    if (!carrito) return res.status(400).json("El carrito no existe");
+
+    // Si no se encuentra el carrito, devolver un carrito vacío
+    if (!carrito) return res.status(200).json({ carrito: null, productos: [] });
 
     let productosAgregados = await prisma.carrito_productos.findMany({
       where: {
-        id_carrito: parseInt(id_carrito),
+        id_carrito: carrito.id,
       },
     });
+
+    // Si no hay productos en el carrito, devolver el carrito con productos vacíos
     if (!productosAgregados.length) return res.status(200).json({ carrito, productos: [] });
 
     // Obtener los detalles de los productos y sus imágenes
@@ -354,6 +356,7 @@ export const getCart = async (req, res) => {
     res.status(500).json([error.message]);
   }
 };
+
 
 export const deleteProdcutCart = async (req, res) => {
     try {
