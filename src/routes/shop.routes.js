@@ -16,34 +16,29 @@ router.post(
 //historial de compras
 router.post(
     "/shop/get",
-    authRequired,
     getShop
 );
 
 //agregar al carrito
 router.post(
     "/shop/addCart",
-    authRequired,
     addCart
 )
 
 //obtener carrito
 router.post(
     "/shop/getCart",
-    authRequired,
     getCart
 )
 
 //eliminar carrito
 router.delete(
     "/shop/deleteProduct",
-    authRequired,
     deleteProdcutCart
 );
 
 router.delete(
     "/shop/deleteCart",
-    authRequired,
     deleteCart
 )
 
