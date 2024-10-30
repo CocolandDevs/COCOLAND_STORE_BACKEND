@@ -29,22 +29,12 @@ export const cuponSchema = z.object({
     .min(1)
     .optional()
     .nullable(),
-  fecha_inicio: z.
-    string({
-        required_error: "La fecha de inicio es requerida",
-        invalid_type_error: "La fecha de inicio debe ser una fecha",
-    }).date({
-        message: "La fecha de inicio debe ser una fecha",
-    }),
+  fecha_inicio: z
+    .string()
+    .date("La fecha de inicio debe ser una fecha"),
   fecha_fin: z
-    .string({
-        required_error: "La fecha de fin es requerida",
-        invalid_type_error: "La fecha de fin debe ser una fecha",
-    })
-    .date({
-        required_error: "La fecha de fin es requerida",
-        invalid_type_error: "La fecha de fin debe ser una fecha",
-    }),
+    .string()
+    .date("La fecha de fin debe ser una fecha"),
   status: z
     .boolean({
       invalid_type_error: "El estatus debe ser un booleano",
