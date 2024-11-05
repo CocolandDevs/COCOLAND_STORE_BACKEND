@@ -14,13 +14,13 @@ const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
 export const register = async (req,res) => {
     const { username, email, password } = req.body;
     try {
-        const userFound = await prisma.uSUARIOS.findUnique( { where: { email } });
+        const userFound = await prisma.usuarios.findUnique( { where: { email } });
 
         if (userFound) return res.status(400).json(["User already exists"]);
 
         const passwordHash = await hashPassword(password);
 
-        const user = await prisma.uSUARIOS.create({
+        const user = await prisma.usuarios.create({
             data: {
                 name: username,
                 email,
@@ -28,10 +28,10 @@ export const register = async (req,res) => {
             }
         });
         //obtenemos el rol de Administrador
-        const rol = await prisma.rOLES.findFirst({where : {nombre :  "Usuario"}});
+        const rol = await prisma.roles.findFirst({where : {nombre :  "Usuario"}});
 
         //creamos el rol del usuario
-        await prisma.uSUARIOS_ROLES.create({
+        await usuarios_roles.create({
             data : {
                 id_usuario : user.id,
                 id_rol : rol.id
@@ -60,7 +60,7 @@ export const login = async (req,res) => {
     try {
         const { email, password } = req.body;
         
-        const userfound = await prisma.uSUARIOS.findUnique({ where: { email } });
+        const userfound = await prisma.usuarios.findUnique({ where: { email } });
         
         if (!userfound) return res.status(400).json(["User not found"]);
 
@@ -116,7 +116,7 @@ export const verifyToken = async (req, res) => {
             }
 
             try {
-                const userFound = await prisma.uSUARIOS.findUnique({ where: { id: user.id } });
+                const userFound = await prisma.usuarios.findUnique({ where: { id: user.id } });
 
                 if (!userFound) {
                     return res.status(404).json({ error: "User not found" });
@@ -154,7 +154,7 @@ export const hashPasswordTest = async (req,res) => {
 export const sendMail = async (req, res) => {
     try {
         let images = [];
-        const productos = await prisma.pRODUCTOS.findMany({
+        const productos = await prisma.productos.findMany({
             where:{
                 imagen_default: {
                     not: null

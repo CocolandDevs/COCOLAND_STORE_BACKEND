@@ -15,7 +15,7 @@ export const createShop = async (req, res) => {
     tipo_pago,
   } = req.body;
   try {
-    const shop = await prisma.cOMPRAS_USUARIO.create({
+    const shop = await prisma.compras_usuario.create({
       data: {
         id_usuario : parseInt(id_usuario),
         id_producto : parseInt(id_producto),
@@ -43,7 +43,7 @@ export const getShop = async (req, res) => {
     if (!id_usuario)
       return res.status(400).json("el id del usuario es requerido");
 
-    const shop = await prisma.cOMPRAS_USUARIO.findMany({
+    const shop = await prisma.compras_usuario.findMany({
       where: {
         id_usuario: parseInt(id_usuario),
       },
@@ -52,7 +52,7 @@ export const getShop = async (req, res) => {
     if (shop.length > 0) {
       compras = await Promise.allSettled(
         shop.map(async (compra) => {
-          const producto = await prisma.pRODUCTOS.findUnique({
+          const producto = await prisma.productos.findUnique({
             where: {
               id: compra.id_producto,
             },
@@ -61,7 +61,7 @@ export const getShop = async (req, res) => {
           if (producto && producto.imagen_default != null) {
             imagen = getImage(producto.imagen_default);
           }
-          const ubicacion = await prisma.uBICACIONES_USUARIO.findUnique({
+          const ubicacion = await prisma.ubicaciones_usuario.findUnique({
             where: {
               id: compra.id_ubicacion,
             },
@@ -105,7 +105,7 @@ export const getShop = async (req, res) => {
 
     
     
-//     const carrito = await prisma.cARRITO_COMPRA.create({
+//     const carrito = await prisma.carrito_compra.create({
 //       data: {
 //         id_usuario: parseInt(id_usuario),
 //         status: ,
@@ -235,7 +235,7 @@ export const addCart = async (req, res) => {
 //     const user = userExist(id_usuario);
 //     if (!user) return res.status(400).json("El usuario no existe");
 
-//     let productosAgregados = await prisma.cARRITO_COMPRA.findMany({
+//     let productosAgregados = await prisma.carrito_compra.findMany({
 //       where: {
 //         id_usuario: parseInt(id_usuario),
 //         status: true,
@@ -247,7 +247,7 @@ export const addCart = async (req, res) => {
 //     if (productosAgregados.length > 0) {
 //       carrito = await Promise.allSettled(
 //         productosAgregados.map(async (producto) => {
-//           const productoInfo = await prisma.pRODUCTOS.findUnique({
+//           const productoInfo = await prisma.productos.findUnique({
 //             where: {
 //               id: producto.id_producto,
 //             },
@@ -354,7 +354,7 @@ export const deleteProdcutCart = async (req, res) => {
         const { id } = req.body;
         if (!id) return res.status(400).json("El id es requerido");
     
-        const producto = await prisma.cARRITO_COMPRA.findUnique({
+        const producto = await prisma.carrito_compra.findUnique({
           where: {
               id: parseInt(id),
           },
@@ -362,7 +362,7 @@ export const deleteProdcutCart = async (req, res) => {
     
         if (!producto) return res.status(400).json("El producto no existe");
     
-        const deleteProducto = await prisma.cARRITO_COMPRA.update({
+        const deleteProducto = await prisma.carrito_compra.update({
           where: {
               id: parseInt(id),
           },
@@ -388,7 +388,7 @@ export const deleteCart = async (req,res) => {
     const user = userExist(id_usuario);
     if (!user) return res.status(400).json("El usuario no existe");
 
-    const productosDelete = await prisma.cARRITO_COMPRA.updateMany({
+    const productosDelete = await prisma.carrito_compra.updateMany({
       where: {
         id_usuario: parseInt(id_usuario),
         status: true,

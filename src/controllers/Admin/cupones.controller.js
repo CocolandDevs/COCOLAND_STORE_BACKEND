@@ -2,7 +2,7 @@ import prisma from "../../libs/client.js";
 
 export const getAllCupones = async (req, res) => {
     try {
-        const cupones = await prisma.cUPONES.findMany();
+        const cupones = await prisma.cupones.findMany();
         return res.status(200).json(cupones);
     } catch (error) {
         return res.status(500).json([error.message]);
@@ -12,7 +12,7 @@ export const getAllCupones = async (req, res) => {
 export const getCupon = async (req, res) => {
     const { id } = req.params;
     try {
-        const cupon = await prisma.cUPONES.findUnique({
+        const cupon = await prisma.cupones.findUnique({
             where: {
                 id: parseInt(id),
             },
@@ -44,7 +44,7 @@ export const createCupon = async (req, res) => {
             return res.status(400).json(["La fecha de inicio debe ser mayor a la fecha actual"]);
         }
 
-        const cupon = await prisma.cUPONES.create({
+        const cupon = await prisma.cupones.create({
             data: {
                 nombre,
                 descripcion,
@@ -87,7 +87,7 @@ export const updateCupon = async (req, res) => {
             return res.status(400).json(["La fecha de inicio debe ser mayor a la fecha actual"]);
         }
 
-        const cupon = await prisma.cUPONES.update({
+        const cupon = await prisma.cupones.update({
             where: {
                 id: parseInt(id),
             },
@@ -115,14 +115,14 @@ export const updateCupon = async (req, res) => {
 export const deleteCupon = async (req, res) => {
     const { id } = req.params;
     try {
-        const cupon = await prisma.cUPONES.findUnique({
+        const cupon = await prisma.cupones.findUnique({
             where: {
                 id: parseInt(id),
             },
         });
         if (!cupon) return res.status(400).json(["Cupon not found"]);
 
-        const cuponDeleted = await prisma.cUPONES.update({
+        const cuponDeleted = await prisma.cupones.update({
             where: {
                 id: parseInt(id),
             },

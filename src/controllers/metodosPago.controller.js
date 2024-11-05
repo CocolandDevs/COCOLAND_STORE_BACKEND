@@ -5,7 +5,7 @@ export const getMethodsPayment = async (req, res) => {
     try {
         const { id } = req.params;
         if (id) {
-            const methodPayment = await prisma.mETODOS_PAGO.findFirst({
+            const methodPayment = await prisma.metodos_pago.findFirst({
                 where: {
                     id_usuario: parseInt(id)
                 }
@@ -25,7 +25,7 @@ export const getMethodsPayment = async (req, res) => {
             return res.status(200).json(methodPayment);
         }
 
-        const methodPayments = await prisma.mETODOS_PAGO.findMany();
+        const methodPayments = await prisma.metodos_pago.findMany();
         res.status(200).json(methodPayments);
 
     } catch (error) {
@@ -59,7 +59,7 @@ export const createMethodPayment = async (req, res) => {
         }
 
         // Guarda el método de pago en tu base de datos
-        const methodPayment = await prisma.mETODOS_PAGO.create({
+        const methodPayment = await prisma.metodos_pago.create({
             data: {
                 nombre,
                 id_usuario: parseInt(id_usuario),
@@ -85,7 +85,7 @@ export const updateMethodPayment = async (req, res) => {
         const { nombre, id_usuario, id_paypal, numero_tarjeta, fecha_vencimiento, cvv, status, tipo } = req.body;
 
         // Busca el método de pago en la base de datos
-        const existingPaymentMethod = await prisma.mETODOS_PAGO.findUnique({
+        const existingPaymentMethod = await prisma.metodos_pago.findUnique({
             where: {
                 id: parseInt(id)
             }
@@ -106,7 +106,7 @@ export const updateMethodPayment = async (req, res) => {
         }
 
         // Actualiza el método de pago en la base de datos
-        const updatedMethodPayment = await prisma.mETODOS_PAGO.update({
+        const updatedMethodPayment = await prisma.metodos_pago.update({
             where: {
                 id: parseInt(id)
             },
@@ -133,7 +133,7 @@ export const deleteMethodPayment = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const methodPayment = await prisma.mETODOS_PAGO.update({
+        const methodPayment = await prisma.metodos_pago.update({
             where: {
                 id: parseInt(id)
             },

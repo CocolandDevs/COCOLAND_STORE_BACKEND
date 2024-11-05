@@ -4,14 +4,14 @@ import { hashPassword } from "../src/libs/bycript.js";
 
 async function main() {
     //eliminamos primero los datos de la base de datos
-    await prisma.uSUARIOS.deleteMany({
+    await prisma.usuarios.deleteMany({
         where: {
             id: {
                 not: 1
             }
         }
     });
-    await prisma.uSUARIOS_ROLES.deleteMany({
+    await prisma.usuarios_roles.deleteMany({
         where: {
             id_usuario: {
                 not: 1
@@ -19,13 +19,13 @@ async function main() {
         }
     });
 
-    await prisma.pERFIL_USUARIO.deleteMany({});
-    await prisma.cOMPRAS_USUARIO.deleteMany({});
+    await prisma.perfil_usuario.deleteMany({});
+    await prisma.compras_usuario.deleteMany({});
     await prisma.productos_compra.deleteMany({});
-    await prisma.cARACTERISTICAS.deleteMany({});
-    await prisma.pRODUCTOS.deleteMany({});
-    await prisma.cATEGORIAS.deleteMany({});
-    await prisma.cUPONES.deleteMany({});
+    await prisma.caracteristicas.deleteMany({});
+    await prisma.productos.deleteMany({});
+    await prisma.categorias.deleteMany({});
+    await prisma.cupones.deleteMany({});
     await prisma.cupon_uso.deleteMany({});
 
     await createUsers();
@@ -34,10 +34,10 @@ async function main() {
     await createCupones();
 
     //recuperamos los usuarios creados
-    const usuarios = (await prisma.uSUARIOS.findMany({})).map(usuario => usuario.id);
+    const usuarios = (await prisma.usuarios.findMany({})).map(usuario => usuario.id);
     //recuperamos los productos creados
-    const productos = (await prisma.pRODUCTOS.findMany({})).map(producto => producto.id);
-    const productosObj = await prisma.pRODUCTOS.findMany({});
+    const productos = (await prisma.productos.findMany({})).map(producto => producto.id);
+    const productosObj = await prisma.productos.findMany({});
     
 
     usuarios.forEach(async (usuario) => {
@@ -45,7 +45,7 @@ async function main() {
         for (let index = 0; index < parseInt(faker.number.int({min: 10, max:15})); index++) {
             let totalCompra = 0;
             let fechaCompra = faker.date.past({years:5});
-            let compra = await prisma.cOMPRAS_USUARIO.create({
+            let compra = await prisma.compras_usuario.create({
                 data: {
                     // id_usuario: faker.helpers.arrayElement(usuarios),
                     id_usuario: usuario,
@@ -78,7 +78,7 @@ async function main() {
                 });
             }
             //actualizamos el total de la compra
-            await prisma.cOMPRAS_USUARIO.update({
+            await prisma.compras_usuario.update({
                 where: {
                     id: compra.id
                 },
@@ -94,7 +94,7 @@ async function main() {
 }
 
 const createCategories = async () => {
-    const categorias = await prisma.cATEGORIAS.createMany({
+    const categorias = await prisma.categorias.createMany({
         data: [
             {
                 nombre: 'Videojuegos',
@@ -120,7 +120,7 @@ const createCategories = async () => {
     })
 }
 const createCupones = async () => {
-    const cupones = await prisma.cUPONES.createMany({
+    const cupones = await prisma.cupones.createMany({
         data: [
             {
                 nombre: 'CHICHAN',
@@ -168,7 +168,7 @@ const createCupones = async () => {
 
 const createProductos = async () => {
     for (let index = 0; index < 10; index++) {
-        let producto = await prisma.pRODUCTOS.create({
+        let producto = await prisma.productos.create({
             data: {
             nombre: faker.commerce.productName(),
             stock: faker.number.int({min: 1, max: 100}),
@@ -260,7 +260,7 @@ const createProductos = async () => {
             ];
         }
 
-        await prisma.cARACTERISTICAS.createMany({
+        await prisma.caracteristicas.createMany({
             data: caracteristicasData
         });
 
@@ -274,12 +274,12 @@ const createUsers = async () => {
 
         do {
             email = faker.internet.email();
-            existingUser = await prisma.uSUARIOS.findUnique({
+            existingUser = await prisma.usuarios.findUnique({
             where: { email: email }
             });
         } while (existingUser);
 
-        let usuario = await prisma.uSUARIOS.create({
+        let usuario = await prisma.usuarios.create({
             data: {
             name: faker.name.firstName(),
             email: email,
@@ -289,7 +289,7 @@ const createUsers = async () => {
             }
         });
 
-        let usuario_rol = await prisma.uSUARIOS_ROLES.create({
+        let usuario_rol = await prisma.usuarios_roles.create({
             data: {
                 id_usuario: usuario.id,
                 id_rol: 2 ,
@@ -298,7 +298,7 @@ const createUsers = async () => {
             }
         });
 
-        let perfil = await prisma.pERFIL_USUARIO.create({
+        let perfil = await prisma.perfil_usuario.create({
             data: {
                 id_usuario: usuario.id,
                 nombres: faker.name.firstName(),
@@ -312,7 +312,7 @@ const createUsers = async () => {
         });
 
         for (let index = 0; index <= 4; index++) {
-            let ubicacion = await prisma.uBICACIONES_USUARIO.create({
+            let ubicacion = await prisma.ubicaciones_usuario.create({
                 data: {
                     id_usuario: usuario.id,
                     direccion: faker.location.streetAddress(),

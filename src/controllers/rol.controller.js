@@ -2,7 +2,7 @@ import prisma from "../libs/client.js";
 
 export const getRoles = async (req, res) => {
   try {
-    const roles = await prisma.rOLES.findMany();
+    const roles = await prisma.roles.findMany();
     return res.status(200).json(roles);
   } catch (error) {
     return res.status(500).json([error.message]);
@@ -12,7 +12,7 @@ export const getRoles = async (req, res) => {
 export const createRol = async (req, res) => {
   const { nombre, status } = req.body;
   try {
-    const rol = await prisma.rOLES.create({
+    const rol = await prisma.roles.create({
       data: {
         nombre,
         status
@@ -31,7 +31,7 @@ export const updateRol = async (req, res) => {
   const { id } = req.params;
   const { nombre, status } = req.body;
   try {
-    const rol = await prisma.rOLES.update({
+    const rol = await prisma.roles.update({
       where: {
         id: parseInt(id),
       },
@@ -53,7 +53,7 @@ export const deleteRol = async (req, res) => {
   const { id } = req.params;
   try {
     
-    const rol = await prisma.rOLES.findUnique({
+    const rol = await prisma.roles.findUnique({
       where: {
         id: parseInt(id),
       },
@@ -61,7 +61,7 @@ export const deleteRol = async (req, res) => {
 
     if (!rol) return res.status(400).json(["Rol not found"]);
 
-    const rolDeleted = await prisma.rOLES.update({
+    const rolDeleted = await prisma.roles.update({
       where: {
         id: parseInt(id),
       },

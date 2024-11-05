@@ -6,7 +6,7 @@ export const getProductos = async (req, res) => {
   const { id } = req.params;
   try {
     if (id) {
-      const producto = await prisma.pRODUCTOS.findUnique({
+      const producto = await prisma.productos.findUnique({
         where: {
           id: parseInt(id),
         },
@@ -14,7 +14,7 @@ export const getProductos = async (req, res) => {
 
       if (!producto) return res.status(400).json(["Producto not found"]);
       //añadmos las características a la petición
-      const caracteristicas = await prisma.cARACTERISTICAS.findMany({
+      const caracteristicas = await prisma.caracteristicas.findMany({
         where: {
           id_producto: parseInt(id),
         },
@@ -29,19 +29,19 @@ export const getProductos = async (req, res) => {
       return res.status(200).json(producto);
     }
 
-    const productos = await prisma.pRODUCTOS.findMany();
+    const productos = await prisma.productos.findMany();
 
     if (productos.length > 0) {
       for (let i = 0; i < productos.length; i++) {
         const item = productos[i];
 
-        const categoria = await prisma.cATEGORIAS.findUnique({
+        const categoria = await prisma.categorias.findUnique({
           where: {
             id: item.id_categoria,
           }
         })
         //agregamos las características a la petición
-        const caracteristicas = await prisma.cARACTERISTICAS.findMany({
+        const caracteristicas = await prisma.caracteristicas.findMany({
           where: {
             id_producto: item.id,
           },
@@ -65,7 +65,7 @@ export const getProductosImage = async (req, res) => {
   const { id } = req.params;
   try {
     if (id) {
-      const producto = await prisma.pRODUCTOS.findUnique({
+      const producto = await prisma.productos.findUnique({
         where: {
           id: parseInt(id),
         },
@@ -80,7 +80,7 @@ export const getProductosImage = async (req, res) => {
       return res.status(200).json(producto);
     }
 
-    const productos = await prisma.pRODUCTOS.findMany({
+    const productos = await prisma.productos.findMany({
       where: {
         status: true,
       },
@@ -113,7 +113,7 @@ export const createProducto = async (req, res) => {
       imgReference = await guardarImagen(imagen, "Productos");
     }
 
-    const producto = await prisma.pRODUCTOS.create({
+    const producto = await prisma.productos.create({
       data: {
         nombre,
         descripcion,
@@ -131,7 +131,7 @@ export const createProducto = async (req, res) => {
       let arrayCarateristicas = JSON.parse(caracteristicas);
       
       arrayCarateristicas.forEach(async (caracteristica) => {
-        await prisma.cARACTERISTICAS.create({
+        await prisma.caracteristicas.create({
           data: {
             nombre: caracteristica.nombre,
             valor: caracteristica.valor,
@@ -188,7 +188,7 @@ export const updateProductos = async (req, res) => {
       };
     }
 
-    const producto = await prisma.pRODUCTOS.update({
+    const producto = await prisma.productos.update({
       where: {
         id: parseInt(id),
       },
@@ -199,14 +199,14 @@ export const updateProductos = async (req, res) => {
       let updateCaracteristicas = JSON.parse(caracteristicas);
 
       // First, delete existing characteristics for the product
-      await prisma.cARACTERISTICAS.deleteMany({
+      await prisma.caracteristicas.deleteMany({
         where: {
           id_producto: parseInt(id),
         },
       });
 
       updateCaracteristicas.forEach(async (caracteristica) => {
-        await prisma.cARACTERISTICAS.create({
+        await prisma.caracteristicas.create({
           data: {
             nombre: caracteristica.nombre,
             valor: caracteristica.valor,
@@ -229,14 +229,14 @@ export const updateProductos = async (req, res) => {
 export const deleteProducto = async (req, res) => {
   const { id } = req.params;
   try {
-    const producto = await prisma.pRODUCTOS.findUnique({
+    const producto = await prisma.productos.findUnique({
       where: {
         id: parseInt(id),
       },
     });
     if (!producto) return res.status(400).json(["Producto not found"]);
 
-    const productoDeleted = await prisma.pRODUCTOS.update({
+    const productoDeleted = await prisma.productos.update({
       where: {
         id: parseInt(id),
       },
@@ -256,7 +256,7 @@ export const deleteProducto = async (req, res) => {
 export const getImageProducto = async (req, res) => {
   const { id } = req.params;
   try {
-    const producto = await prisma.pRODUCTOS.findUnique({
+    const producto = await prisma.productos.findUnique({
       where: {
         id: parseInt(id),
       },

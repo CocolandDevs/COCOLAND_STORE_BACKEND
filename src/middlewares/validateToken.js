@@ -14,7 +14,7 @@ export const authRequired = async (req, res, next,) => {
         const decoded = jwt.verify(access_token, TOKEN_SECRET_KEY);
         req.user = decoded;
 
-        const userFound = await prisma.uSUARIOS.findUnique({
+        const userFound = await prisma.usuarios.findUnique({
             where: {
                 id: req.user.id
             }
@@ -24,7 +24,7 @@ export const authRequired = async (req, res, next,) => {
             return res.status(401).json({ message: "Usuario no encontrado" });
         }
 
-        const rolUsuario = await prisma.uSUARIOS_ROLES.findFirst({
+        const rolUsuario = await usuarios_roles.findFirst({
             where: {
                 id_usuario: userFound?.id
             }
@@ -34,7 +34,7 @@ export const authRequired = async (req, res, next,) => {
             return res.status(401).json({ message: "Usuario no tiene un rol asignado" });
         }
 
-        const rol = await prisma.rOLES.findUnique({
+        const rol = await prisma.roles.findUnique({
             where: {
                 id: rolUsuario?.id_rol
             }

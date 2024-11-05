@@ -23,7 +23,7 @@ export const getMetodoPagoMasUsado = async (req, res) => {
       return res.status(400).json(["Filtro inválido"]);
     }
 
-    const metodosPago = await prisma.cOMPRAS_USUARIO.groupBy({
+    const metodosPago = await prisma.compras_usuario.groupBy({
       by: ["tipo_pago"],
       _count: {
         tipo_pago: true, 
@@ -87,7 +87,7 @@ export const getVentasTemporadas = async (req, res) => {
     }
 
     // Obtener el número de ventas totales en la temporada y año dados
-    const ventasTemporada = await prisma.cOMPRAS_USUARIO.count({
+    const ventasTemporada = await prisma.compras_usuario.count({
       where: {
         fecha_compra: {
           gte: fechaInicio,
@@ -203,13 +203,13 @@ export const getCategoriaMasVendida = async (req, res) => {
     // Obtener los nombres de las categorías basados en los productos vendidos
     const categoriasMasVendidas = await Promise.all(
       ventasPorProducto.map(async (venta) => {
-        const producto = await prisma.pRODUCTOS.findUnique({
+        const producto = await prisma.productos.findUnique({
           where: {
             id: venta.id_producto,
           },
         });
 
-        const categoria = await prisma.cATEGORIAS.findUnique({
+        const categoria = await prisma.categorias.findUnique({
           where: {
             id: producto.id_categoria,
           },

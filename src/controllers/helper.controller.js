@@ -3,16 +3,16 @@ import fs from "fs";
 
 export const getRolByUser = async (user) => {
     try {
-        const userFound = await prisma.uSUARIOS.findUnique( { where: { id : user } });
+        const userFound = await prisma.usuarios.findUnique( { where: { id : user } });
         if (!userFound) return "No se encontró el usuario";
 
-        const rolFound = await prisma.uSUARIOS_ROLES.findFirst({ where: { id_usuario: userFound.id } });
+        const rolFound = await usuarios_roles.findFirst({ where: { id_usuario: userFound.id } });
 
         if (!rolFound) return "No se encontró el rol del usuario";
 
-        const rol = await prisma.rOLES.findUnique({ where: { id: rolFound.id_rol } });
+        const rol = await prisma.roles.findUnique({ where: { id: rolFound.id_rol } });
         if (!rol) return "No se encontró el rol";
-
+        console.log(rol);
         return rol;
         
     } catch (error) {
@@ -54,7 +54,7 @@ export const guardarImagen = async (file, modulo) => {
 
 export const userExist = async (id) => {
     try {
-        const user = await prisma.uSUARIOS.findUnique({ where: { id : parseInt(id) } });
+        const user = await prisma.usuarios.findUnique({ where: { id : parseInt(id) } });
         return user ? user : null;
     } catch (error) {
         return null;
@@ -63,7 +63,7 @@ export const userExist = async (id) => {
 
 export const carritoExist = async (id) => {
     try {
-        const carrito = await prisma.cARRITO_COMPRA.findUnique({ where: { id : parseInt(id) } });
+        const carrito = await prisma.carrito_compra.findUnique({ where: { id : parseInt(id) } });
         return carrito ? carrito : null;
     } catch (error) {
         return null;
@@ -75,7 +75,7 @@ export const carritoExist = async (id) => {
 export const productoDisponible = async (id) => {
     try {
 
-        const producto = await prisma.pRODUCTOS.findUnique({
+        const producto = await prisma.productos.findUnique({
             where: {
                 id : parseInt(id)
             }

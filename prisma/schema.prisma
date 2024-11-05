@@ -14,7 +14,7 @@ datasource db {
 }
 
 //este es un ejemplo de como se crea una tabla para la base de datos
-model USUARIOS {
+model usuarios {
   id      Int      @id @default(autoincrement())
   email   String   @unique @db.VarChar(255)
   name    String?  @db.VarChar(100)
@@ -26,7 +26,7 @@ model USUARIOS {
 }
 
 //tabla de Roles
-model ROLES {
+model roles {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(50)
   status Boolean? @default(true)
@@ -35,7 +35,7 @@ model ROLES {
 }
 
 //relacion entre usuarios y roles
-model USUARIOS_ROLES {
+model usuarios_roles {
   id Int @id @default(autoincrement())
   id_usuario Int
   id_rol Int
@@ -44,7 +44,7 @@ model USUARIOS_ROLES {
 }
 
 //Perfil de usuario
-model PERFIL_USUARIO{
+model perfil_usuario{
   id Int @id @default(autoincrement())
   id_usuario Int?
   nombres String? @db.VarChar(100)
@@ -59,7 +59,7 @@ model PERFIL_USUARIO{
 }
 
 //ubicaciones de envio de un usuario
-model UBICACIONES_USUARIO {
+model ubicaciones_usuario {
   id               Int      @id @default(autoincrement())
   id_usuario       Int
   direccion        String   @db.VarChar(255) 
@@ -77,7 +77,7 @@ model UBICACIONES_USUARIO {
 }
 
 // tabla de compras 
-model COMPRAS_USUARIO {
+model compras_usuario {
   id Int @id @default(autoincrement())
   id_usuario Int
   id_ubicacion Int
@@ -103,7 +103,7 @@ model productos_compra {
 }
 
 //CATEGORIAS DE PRODUCTOS
-model CATEGORIAS {
+model categorias {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(100)
   status Boolean? @default(true)
@@ -113,7 +113,7 @@ model CATEGORIAS {
 
 
 //CARACTERÍSTICAS DE PRODUCTOS
-model CARACTERISTICAS {
+model caracteristicas {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(255)
   valor String @db.VarChar(255)
@@ -124,7 +124,7 @@ model CARACTERISTICAS {
 }
 
 //productos
-model PRODUCTOS {
+model productos {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(255)
   descripcion String @db.VarChar(255)
@@ -141,7 +141,7 @@ model PRODUCTOS {
 }
 
 //Carrito de compra
-model CARRITO_COMPRA {
+model carrito_compra {
   id Int @id @default(autoincrement())
   id_usuario Int
   status Boolean? @default(true)
@@ -162,7 +162,7 @@ model carrito_productos {
 }
 
 //Métodos de pago
-model METODOS_PAGO {
+model metodos_pago {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(100)
   tipo String? @db.VarChar(100)
@@ -178,7 +178,7 @@ model METODOS_PAGO {
 }
 
 //cupones de descuento
-model CUPONES {
+model cupones {
   id Int @id @default(autoincrement())
   nombre String @db.VarChar(100)
   descripcion String @db.VarChar(255)

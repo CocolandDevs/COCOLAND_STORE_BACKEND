@@ -5,7 +5,7 @@ import { emailSchema, passwordSchema } from "../schemas/usuarios.schema.js";
 
 export const getUsuarios = async (req, res) => {
   try {
-    const usuarios = await prisma.uSUARIOS.findMany({
+    const usuarios = await prisma.usuarios.findMany({
       // where: {
       //   status: true,
       // },
@@ -37,7 +37,7 @@ export const getUsuarios = async (req, res) => {
 export const getUsuario = async (req, res) => {
   const { id } = req.params;
   try {
-    const usuario = await prisma.uSUARIOS.findUnique({
+    const usuario = await prisma.usuarios.findUnique({
       where: {
         id: parseInt(id),
       },
@@ -58,17 +58,17 @@ export const createUsuario = async (req, res) => {
   const { username, password, email, status, rol } = req.body;
 
   try {
-    const usuarioExist = await prisma.uSUARIOS.findFirst({ where: { email } });
+    const usuarioExist = await prisma.usuarios.findFirst({ where: { email } });
     if (usuarioExist) return res.status(400).json(["Usuario ya existe"]);
 
-    const rolAsignado = await prisma.rOLES.findUnique({ where: { id: parseInt(rol) } });
+    const rolAsignado = await prisma.roles.findUnique({ where: { id: parseInt(rol) } });
     if (!rolAsignado) return res.status(500).json( ["Rol no encontrado"] );
     if (!rolAsignado.status) return res.status(500).json(["Rol deshabilitado"]);
 
     const passwordHash = await hashPassword(password);
 
     // Crear el usuario
-    const usuario = await prisma.uSUARIOS.create({
+    const usuario = await prisma.usuarios.create({
       data: {
         name: username,
         password: passwordHash,
@@ -78,7 +78,7 @@ export const createUsuario = async (req, res) => {
     });
 
     // Asignar el rol al usuario
-    const rolUser = await prisma.uSUARIOS_ROLES.create({
+    const rolUser = await usuarios_roles.create({
       data: {
         id_rol: parseInt(rol),
         id_usuario: usuario.id,
@@ -107,7 +107,7 @@ export const updateUsuario = async (req, res) => {
     const userId = parseInt(id);
 
     // Buscar el usuario
-    const usuario = await prisma.uSUARIOS.findUnique({ where: { id: userId } });
+    const usuario = await prisma.usuarios.findUnique({ where: { id: userId } });
 
     if (!usuario) return res.status(500).json(["Usuario no encontrado" ]);
 
@@ -126,7 +126,7 @@ export const updateUsuario = async (req, res) => {
     }
 
     // Actualizar usuario
-    const usuarioUpdate = await prisma.uSUARIOS.update({
+    const usuarioUpdate = await prisma.usuarios.update({
       where: { id: userId },
       data: {
         name: username,
@@ -137,14 +137,14 @@ export const updateUsuario = async (req, res) => {
     });
 
     // Buscar y actualizar rol si ha cambiado
-    const rolAsignado = await prisma.rOLES.findUnique({ where: { id: rol } });
+    const rolAsignado = await prisma.roles.findUnique({ where: { id: rol } });
     
     if (!rolAsignado) return res.status(500).json(["Rol no encontrado"] );
     if (!rolAsignado.status) return res.status(500).json(["Rol deshabilitado"]);
-    const rolUsuario = await prisma.uSUARIOS_ROLES.findFirst({ where: { id_usuario: userId } });
+    const rolUsuario = await usuarios_roles.findFirst({ where: { id_usuario: userId } });
     
     if (rolUsuario && rolUsuario.id_rol !== rolAsignado.id) {
-      await prisma.uSUARIOS_ROLES.update({
+      await usuarios_roles.update({
         where: { id: rolUsuario.id },
         data: { id_rol: rolAsignado.id },
       });
@@ -167,7 +167,7 @@ export const deleteUsuario = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const usuarioDeleted = await prisma.uSUARIOS.update({
+    const usuarioDeleted = await prisma.usuarios.update({
       where: {
         id: parseInt(id),
       },
@@ -195,7 +195,7 @@ export const getUbicaciones = async (req, res) => {
     const usuario = await userExist(id);
     if (!usuario) return res.json(["Usuario no encontrado"]);
 
-    const ubicaciones = await prisma.uBICACIONES_USUARIO.findMany({
+    const ubicaciones = await prisma.ubicaciones_usuario.findMany({
       where: {
         id_usuario: parseInt(id),
         status: true,
@@ -232,7 +232,7 @@ export const agregarUbicacion = async (req, res) => {
     const usuario = await userExist(id_usuario);
     if (!usuario) return res.json(["Usuario no encontrado"]);
 
-    const ubicacion = await prisma.uBICACIONES_USUARIO.create({
+    const ubicacion = await prisma.ubicaciones_usuario.create({
       data: {
         id_usuario : parseInt(id_usuario),
         direccion,
@@ -282,7 +282,7 @@ export const editarUbicacion = async (req, res) => {
     const usuario = await userExist(id_usuario);
     if (!usuario) return res.json(["Usuario no encontrado"]);
 
-    const ubicacion = await prisma.uBICACIONES_USUARIO.update({
+    const ubicacion = await prisma.ubicaciones_usuario.update({
       where: {
         id: parseInt(id),
       },
@@ -318,7 +318,7 @@ export const deleteUbicacion = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ubicacionDeleted = await prisma.uBICACIONES_USUARIO.update({
+    const ubicacionDeleted = await prisma.ubicaciones_usuario.update({
       where: {
         id: parseInt(id),
       },
@@ -349,7 +349,7 @@ export const getPerfil = async (req, res) => {
     if (!usuario) return res.json(["Usuario no encontrado"]);
     //console.log(usuario);
 
-    const perfil = await prisma.pERFIL_USUARIO.findFirst({
+    const perfil = await prisma.perfil_usuario.findFirst({
       where: {
         id_usuario: parseInt(id_usuario)
       },
@@ -409,7 +409,7 @@ export const agregarPerfil = async (req, res) => {
       }
     }
 
-    const perfilExist = await prisma.pERFIL_USUARIO.findFirst({
+    const perfilExist = await prisma.perfil_usuario.findFirst({
       where: {
         id_usuario: parseInt(id_usuario),
       },
@@ -417,11 +417,11 @@ export const agregarPerfil = async (req, res) => {
     let perfil;
 
     if (!perfilExist) {
-      perfil = await prisma.pERFIL_USUARIO.create({
+      perfil = await prisma.perfil_usuario.create({
         data: perfilData,
       });
     }else{
-      perfil = await prisma.pERFIL_USUARIO.update({
+      perfil = await prisma.perfil_usuario.update({
         where: {
           id: perfilExist.id,
         },
@@ -444,7 +444,7 @@ export const agregarPerfil = async (req, res) => {
 export const getImagePerfil = async (req, res) => {
   try {
     const { id } = req.params;
-    const perfil = await prisma.pERFIL_USUARIO.findFirst({
+    const perfil = await prisma.perfil_usuario.findFirst({
       where: {
         id: parseInt(id),
       },
