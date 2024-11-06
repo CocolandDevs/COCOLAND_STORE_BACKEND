@@ -3,11 +3,12 @@ import fs from "fs";
 
 export const getRolByUser = async (user) => {
     try {
+        
         const userFound = await prisma.usuarios.findUnique( { where: { id : user } });
         if (!userFound) return "No se encontró el usuario";
-
-        const rolFound = await usuarios_roles.findFirst({ where: { id_usuario: userFound.id } });
-
+        
+        const rolFound = await prisma.usuarios_roles.findFirst({ where: { id_usuario: userFound.id } });
+        
         if (!rolFound) return "No se encontró el rol del usuario";
 
         const rol = await prisma.roles.findUnique({ where: { id: rolFound.id_rol } });

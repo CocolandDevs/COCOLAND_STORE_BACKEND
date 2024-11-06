@@ -36,12 +36,8 @@ export const paymentMethodSchema = z.object({
     required_error: "Número de tarjeta es requerido",
   }),
   fecha_vencimiento: z
-    .string({
-      required_error: "Fecha de vencimiento de la tarjeta es requerida",
-    })
-    .date({
-      message: "Fecha de nacimiento no es válida",
-    }),
+    .string()
+    .date("La fecha de vencimiento debe ser una fecha"),
   cvv: z
     .number({
       required_error: "CVV de la tarjeta es requerido",

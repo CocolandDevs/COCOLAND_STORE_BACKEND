@@ -31,7 +31,7 @@ export const register = async (req,res) => {
         const rol = await prisma.roles.findFirst({where : {nombre :  "Usuario"}});
 
         //creamos el rol del usuario
-        await usuarios_roles.create({
+        await prisma.usuarios_roles.create({
             data : {
                 id_usuario : user.id,
                 id_rol : rol.id

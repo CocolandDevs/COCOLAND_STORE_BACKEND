@@ -24,7 +24,7 @@ export const authRequired = async (req, res, next,) => {
             return res.status(401).json({ message: "Usuario no encontrado" });
         }
 
-        const rolUsuario = await usuarios_roles.findFirst({
+        const rolUsuario = await prisma.usuarios_roles.findFirst({
             where: {
                 id_usuario: userFound?.id
             }

@@ -123,12 +123,8 @@ export const perfilUsuarioSchema = z.object({
       })
       .optional(),
     fecha_nacimiento: z
-      .string({
-        invalid_type_error: "Fecha de nacimiento debe ser una cadena de texto",
-      })
-      .date({
-        message: "Fecha de nacimiento no es válida",
-      })
+      .string()
+      .date("La fecha de nacimiento debe ser una fecha")
       .optional(),
     telefono: z
       .union([...validationId],{

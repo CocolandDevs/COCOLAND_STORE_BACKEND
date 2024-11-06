@@ -42,13 +42,8 @@ export const shopSchema = z.object({
             message: "La cantidad debe ser un número positivo"
         }),
     fecha_compra :z
-        .string({
-            invalid_type_error: "Fecha de compra debe ser una fecha",
-            required_error: "Fecha de compra es requerida",
-        })
-        .date({
-            message: "Fecha de compra debe ser una fecha"
-        }),
+        .string()
+        .date("La fecha de compra debe ser una fecha"),
     tipo_pago : z
         .string({
             invalid_type_error: "Tipo de pago debe ser un texto",

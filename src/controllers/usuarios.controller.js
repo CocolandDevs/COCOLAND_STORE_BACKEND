@@ -78,7 +78,7 @@ export const createUsuario = async (req, res) => {
     });
 
     // Asignar el rol al usuario
-    const rolUser = await usuarios_roles.create({
+    const rolUser = await prisma.usuarios_roles.create({
       data: {
         id_rol: parseInt(rol),
         id_usuario: usuario.id,
@@ -141,10 +141,10 @@ export const updateUsuario = async (req, res) => {
     
     if (!rolAsignado) return res.status(500).json(["Rol no encontrado"] );
     if (!rolAsignado.status) return res.status(500).json(["Rol deshabilitado"]);
-    const rolUsuario = await usuarios_roles.findFirst({ where: { id_usuario: userId } });
+    const rolUsuario = await prisma.usuarios_roles.findFirst({ where: { id_usuario: userId } });
     
     if (rolUsuario && rolUsuario.id_rol !== rolAsignado.id) {
-      await usuarios_roles.update({
+      await prisma.usuarios_roles.update({
         where: { id: rolUsuario.id },
         data: { id_rol: rolAsignado.id },
       });
@@ -379,7 +379,7 @@ export const agregarPerfil = async (req, res) => {
     
     let image = req?.files?.imagen ?? null;
     let imgReference = null;
-    const fechaNacimiento = new Date(fecha_nacimiento);
+    const fechaNacimiento = new Date(fecha_nacimiento);    
     const usuario = await userExist(id_usuario);
 
     if (!usuario) return res.json(["Usuario no encontrado"]);
