@@ -136,13 +136,13 @@ export const addCart = async (req, res) => {
     if (!estatus) return res.status(400).json({ message });
 
     // 3. Buscar o crear un carrito para el usuario
-    let carrito = await prisma.CARRITO_COMPRA.findFirst({
+    let carrito = await prisma.carrito_compra.findFirst({
       where: { id_usuario: parseInt(id_usuario) },
     });
 
     if (!carrito) {
       // Si no existe un carrito, crear uno nuevo
-      carrito = await prisma.CARRITO_COMPRA.create({
+      carrito = await prisma.carrito_compra.create({
         data: {
           id_usuario: parseInt(id_usuario),
           status: true,
@@ -207,7 +207,7 @@ export const addCart = async (req, res) => {
     const total = subtotal; // Total será igual al subtotal
 
     // 7. Actualizar el carrito con el nuevo subtotal y total
-    await prisma.CARRITO_COMPRA.update({
+    await prisma.carrito_compra.update({
       where: { id: carrito.id },
       data: {
         subtotal: subtotal,
@@ -292,7 +292,7 @@ export const getCart = async (req, res) => {
     if (!user) return res.status(400).json("El usuario no existe");
 
     // Buscar el carrito del usuario
-    const carrito = await prisma.CARRITO_COMPRA.findFirst({
+    const carrito = await prisma.carrito_compra.findFirst({
       where: { id_usuario: parseInt(id_usuario) },
     });
 

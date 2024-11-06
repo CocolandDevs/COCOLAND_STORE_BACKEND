@@ -23,7 +23,7 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 import cuponRoutes from "./routes/Admin/cupones.routes.js";
 
 import path from "path";
-
+const host = process.env.FRONTEND_URL || "http://localhost:5173";
 const App = express();
 
 App.use(morgan("dev"))
@@ -32,7 +32,7 @@ App.use(morgan("dev"))
   .use(
     cors({
       //cambiar por la ip del servidor
-      origin: "http://localhost:5173",
+      origin: host,
       // origin: "http://172.23.176.1:5173",
       credentials: true,
     })
