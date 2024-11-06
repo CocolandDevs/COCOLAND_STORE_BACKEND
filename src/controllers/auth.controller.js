@@ -10,6 +10,7 @@ import path from 'path';
 
 
 const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
+const DOMAIN = process.env.FRONTEND_DOMAIN || "localhost:5173";
 
 export const register = async (req,res) => {
     const { username, email, password } = req.body;
@@ -40,7 +41,12 @@ export const register = async (req,res) => {
 
         const token = await createAccessToken({ id: user.id });
 
-        res.cookie("access_token", token);
+        res.cookie("access_token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+        });
+
 
         res.status(200).json({
             message: "User created successfully",
@@ -72,7 +78,11 @@ export const login = async (req,res) => {
 
         const rol = await getRolByUser(userfound.id);
 
-        res.cookie("access_token", token);
+        res.cookie("access_token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+        });
 
         res.status(200).json({
             message: "User logged in successfully",
@@ -90,7 +100,10 @@ export const logout = (req,res) =>{
     try {
 
         res.cookie('access_token',"",{
-            expires : new Date(0)
+            expires : new Date(0),
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
            });
         return res.status(200).json(["User logged out"]);
 
