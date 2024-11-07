@@ -47,6 +47,7 @@ export const register = async (req,res) => {
             sameSite: 'none',
         });
 
+        await sendMail('bienvenida', email, res);
 
         res.status(200).json({
             message: "User created successfully",
@@ -83,6 +84,7 @@ export const login = async (req,res) => {
             secure: true,
             sameSite: 'none',
         });
+        await sendMail('bienvenida', email, res);
 
         res.status(200).json({
             message: "User logged in successfully",
@@ -164,11 +166,11 @@ export const hashPasswordTest = async (req,res) => {
     }
 }
 
-export const sendMail = async (req, res) => {
+export const sendMail = async (templateName, recipientEmail, res) => {
     try {
         let images = [];
         const productos = await prisma.productos.findMany({
-            where:{
+            where: {
                 imagen_default: {
                     not: null
                 }
@@ -176,18 +178,18 @@ export const sendMail = async (req, res) => {
         });
 
         productos.forEach(producto => {
-            let obj= {
-                id : producto.id,
-                nombre : producto.nombre,
-                precio : producto.precio,
-                descripcion : producto.descripcion,
-                imagen_default : producto.imagen_default
+            let obj = {
+                id: producto.id,
+                nombre: producto.nombre,
+                precio: producto.precio,
+                descripcion: producto.descripcion,
+                imagen_default: producto.imagen_default
             }
 
             images.push(obj);
-        }); 
+        });
 
-        const imagesAttachments  = images.map((imagen) => {
+        const imagesAttachments = images.map((imagen) => {
             return {
                 filename: imagen.nombre,
                 content: fs.createReadStream(path.join(path.resolve(), imagen.imagen_default)),
@@ -196,39 +198,34 @@ export const sendMail = async (req, res) => {
                 descripcion: imagen.descripcion,
                 cid: `image${imagen.id}@cid`
             }
-        })
+        });
 
-        
-        let logo =  fs.createReadStream(path.join(path.resolve(), '/src/resources/img/logo.png'));
+        let logo = fs.createReadStream(path.join(path.resolve(), '/src/resources/img/logo.png'));
 
         const template = await new Promise((resolve, reject) => {
-            res.render('home', { productos:imagesAttachments, logo }, (err, html) => { 
-            if (err) {
-                reject(err);
-            } else {
-                resolve(html);
-            }
+            res.render(templateName, { productos: imagesAttachments, logo }, (err, html) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(html);
+                }
             });
         });
-        
-        // return res.send(template);
 
         nodemailer.sendMail({
             from: process.env.SMTP_USER,
-            // to: "leonelrosado2407@gmail.com",
-            to: "clarissa27segovia@gmail.com",
-            subject: "Test",
+            to: recipientEmail,
+            subject: "Bienvenido",
             html: template,
             attachments: imagesAttachments.concat({ filename: 'logo.png', content: logo, cid: `logo@cid` })
-
         }, (error, info) => {
             if (error) {
-                res.status(500).json({ error: error.message });
+                console.error("Error al enviar el correo:", error);
             } else {
-                res.status(200).json({ message: "Email sent", info });
+                console.log("Correo enviado:", info.response);
             }
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error en sendMail:", error.message);
     }
 }
