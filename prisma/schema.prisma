@@ -147,6 +147,7 @@ model carrito_compra {
   status Boolean? @default(true)
   subtotal Decimal
   total Decimal
+  descuento Decimal? @default(0)
   aplica_cupon Boolean? @default(false)
   id_cupon Int?
   created_at DateTime? @default(now())

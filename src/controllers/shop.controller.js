@@ -3,38 +3,93 @@ import { getImage } from "./helper.controller.js";
 import { userExist, productoDisponible, carritoExist } from "./helper.controller.js";
 import { stripe } from "../libs/stripe.js";
 
-export const createShop = async (req, res) => {
-  const {
-    id_usuario,
-    id_producto,
-    id_ubicacion,
-    id_metodo_pago,
-    id_cupon,
-    cantidad,
-    fecha_compra,
-    tipo_pago,
-  } = req.body;
+export const intentPayment = async (req, res) => {
+  const { amount, userId, products } = req.body;
+
   try {
-    const shop = await prisma.compras_usuario.create({
-      data: {
-        id_usuario : parseInt(id_usuario),
-        id_producto : parseInt(id_producto),
-        id_ubicacion : parseInt(id_ubicacion),
-        cantidad : parseInt(cantidad),
-        fecha_compra: new Date(fecha_compra),
-        tipo_pago,
-        id_metodo_pago : id_metodo_pago ? parseInt(id_metodo_pago) : null,
-        id_cupon : id_cupon ? parseInt(id_cupon) : null,
-      },
+    // Crear Payment Intent en Stripe
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'mxn',
+      payment_method_types: ['card'],
     });
-    res.status(200).json({
-      message: "Shop created successfully",
-      shop,
-    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    res.status(500).json([error.message]);
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ error: 'Payment failed' });
   }
-};
+}
+
+export const crearPago = async (req,res) => {
+  const { paymentIntentId, userId, products } = req.body;
+
+  try {
+    // Confirmar el Payment Intent en Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (paymentIntent.status === 'succeeded') {
+      // Crear registro de la compra en la tabla compras_usuario
+      const totalAmount = paymentIntent.amount / 100; // Stripe usa centavos
+      // const compra = await prisma.compras_usuario.create({
+      //   data: {
+      //     userId,
+      //     total: totalAmount,
+      //     status: 'completed',
+      //   },
+      // });
+
+      // // Guardar cada producto en la tabla productos_compra
+      // const productosCompra = products.map((product) => ({
+      //   compraId: compra.id,
+      //   productId: product.productId,
+      //   quantity: product.quantity,
+      //   price: product.price,
+      // }));
+
+      // await prisma.productos_compra.createMany({
+      //   data: productosCompra,
+      // });
+
+      //borrar el carrito
+      const carrito = await prisma.carrito_compra.findFirst({
+        where: {
+          id_usuario: userId,
+        },
+      });
+
+      const productosEnCarrito = await prisma.carrito_productos.findMany({
+        where: {
+          id_carrito: carrito.id,
+        },
+      });
+
+      for (const item of productosEnCarrito) {
+        await prisma.carrito_productos.delete({
+          where: { id: item.id },
+        });
+      }
+
+      await prisma.carrito_compra.update({
+        where: { id: carrito.id },
+        data: {
+          subtotal: 0,
+          total: 0,
+          descuento: 0,
+          aplica_cupon: false,
+          id_cupon: null,
+        },
+      });
+
+      res.json({ success: true, message: 'Purchase confirmed and recorded.' });
+    } else {
+      res.status(400).json({ error: 'Payment not confirmed.' });
+    }
+  } catch (error) {
+    console.error('Error confirming purchase:', error);
+    res.status(500).json({ error: 'Purchase confirmation failed' });
+  }
+}
 
 export const getShop = async (req, res) => {
   try {
@@ -204,7 +259,19 @@ export const addCart = async (req, res) => {
       subtotal += item.cantidad * precioFinal;
     }
 
-    const total = subtotal; // Total será igual al subtotal
+    let total = subtotal; // Total será igual al subtotal
+    let descuento = 0;
+
+    if (carrito.aplica_cupon) {
+      const cupon = await prisma.cupones.findFirst({
+        where: {
+          id: carrito.id_cupon,
+        },
+      });
+      
+      descuento = total * (cupon.porcentaje_descuento / 100);
+      total = total - descuento;
+    }
 
     // 7. Actualizar el carrito con el nuevo subtotal y total
     await prisma.carrito_compra.update({
@@ -212,6 +279,7 @@ export const addCart = async (req, res) => {
       data: {
         subtotal: subtotal,
         total: total,
+        descuento: descuento,
       },
     });
 
@@ -246,7 +314,7 @@ export const getCart = async (req, res) => {
 
     let productosAgregados = await prisma.carrito_productos.findMany({
       where: {
-        id_carrito: carrito.id,
+        id_carrito: carrito.id, 
       },
     });
 
@@ -268,6 +336,10 @@ export const getCart = async (req, res) => {
         // Obtener la imagen (si existe)
         const imagen = productoInfo.imagen_default ? getImage(productoInfo.imagen_default) : null;
 
+        const categoria = await prisma.categorias.findUnique({
+          where: { id: productoInfo.id_categoria },
+        })
+
         return {
           id: producto.id,
           id_producto: producto.id_producto,
@@ -279,6 +351,7 @@ export const getCart = async (req, res) => {
           precio_descuento: productoInfo.precio_descuento,
           stock: productoInfo.stock,
           imagen: imagen,
+          categoria: categoria.nombre,
         };
       })
     );
@@ -297,7 +370,6 @@ export const getCart = async (req, res) => {
 export const deleteProdcutCart = async (req, res) => {
     try {
         const { id_usuario, id_producto, cantidad } = req.body;
-        console.log(req.body);
         
 
         if (!id_producto || !cantidad || !id_usuario) return res.status(400).json("El producto y la cantidad son requeridos");
@@ -325,6 +397,16 @@ export const deleteProdcutCart = async (req, res) => {
             await prisma.carrito_productos.delete({
                 where: { id: productoEnCarrito.id },
             });
+            await prisma.carrito_compra.update({
+                where: { id: carrito.id },
+                data: {
+                    subtotal: 0,
+                    total: 0,
+                    descuento: 0,
+                    aplica_cupon: false,
+                    id_cupon: null,
+                },
+            })
         } else {
             await prisma.carrito_productos.update({
                 where: { id: productoEnCarrito.id },
@@ -344,19 +426,28 @@ export const deleteProdcutCart = async (req, res) => {
         let descuento = 0;
 
         for (const item of productosEnCarrito) {
-          for ( let i = 0; i < item.cantidad; i++) {
-            const producto = await prisma.productos.findUnique({
-                where: { id: item.id_producto },
-            });
+          const producto = await prisma.productos.findUnique({
+              where: { id: item.id_producto },
+          });
 
-            if (producto.en_descuento && producto.precio_descuento) {
-                subtotal += item.cantidad * parseFloat(producto.precio_descuento);
-                total += item.cantidad * parseFloat(producto.precio_descuento);
-            } else {
-                subtotal += item.cantidad * parseFloat(producto.precio);
-                total += item.cantidad * parseFloat(producto.precio);
-            }
+          if (producto.en_descuento && producto.precio_descuento) {
+              subtotal += item.cantidad * parseFloat(producto.precio_descuento);
+              total += item.cantidad * parseFloat(producto.precio_descuento);
+          } else {
+              subtotal += item.cantidad * parseFloat(producto.precio);
+              total += item.cantidad * parseFloat(producto.precio);
           }
+        }
+
+        if(carrito.aplica_cupon) {
+          const cupon = await prisma.cupones.findFirst({
+            where: {
+              id: carrito.id_cupon,
+            },
+          });
+          
+          descuento = total * (cupon.porcentaje_descuento / 100);
+          total = total - descuento;
         }
 
         //actualizamos el carrito
@@ -365,6 +456,7 @@ export const deleteProdcutCart = async (req, res) => {
             data: {
                 subtotal: subtotal,
                 total: total,
+                descuento: descuento,
             },
         });
 
@@ -378,6 +470,58 @@ export const deleteProdcutCart = async (req, res) => {
         res.status(500).json([error.message]);
     }
 };
+
+export const aplicarcupon = async (req,res) => {
+  try {
+    const { cupon, id_usuario } = req.body;
+    if (!cupon) return res.status(400).json("El cupón es requerido");
+    if (!id_usuario) return res.status(400).json("El id del usuario es requerido");
+
+    const cuponFind = await prisma.cupones.findFirst({
+      where: {
+        nombre: cupon,
+      },
+    });
+
+    if (!cuponFind) return res.status(400).json("Cupón no válido");
+    if(cuponFind.status == false) return res.status(400).json("Cupón no disponible");
+    
+    const carrito = await prisma.carrito_compra.findFirst({
+      where: {
+        id_usuario: parseInt(id_usuario),
+      },
+    });
+
+    if (!carrito) return res.status(400).json("El carrito no existe");
+
+    //aplicamos el descuento del cupón
+    let descuento = parseFloat(carrito.total) * (parseFloat(cuponFind.porcentaje_descuento)/ 100);
+    let newTotal = parseFloat(carrito.total) - descuento;
+
+    //actualizamos el carrito
+    await prisma.carrito_compra.update({
+      where: {
+        id: parseInt(carrito.id),
+      },
+      data: {
+        total: parseFloat(newTotal),
+        aplica_cupon: true,
+        id_cupon: cuponFind.id,
+        descuento: parseFloat(descuento),
+      },
+    });
+
+    res.status(200).json({  
+      message: "Cupón aplicado correctamente",
+      total: newTotal,
+    });
+
+  } catch (error) {
+    console.log(error);
+    
+    res.status(500).json([error.message]);
+  }
+}
 
 export const deleteCart = async (req,res) => {
   try {
