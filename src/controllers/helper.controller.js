@@ -13,7 +13,7 @@ export const getRolByUser = async (user) => {
 
         const rol = await prisma.roles.findUnique({ where: { id: rolFound.id_rol } });
         if (!rol) return "No se encontró el rol";
-        console.log(rol);
+        // console.log(rol);
         return rol;
         
     } catch (error) {

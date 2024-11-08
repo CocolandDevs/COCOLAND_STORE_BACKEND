@@ -32,7 +32,7 @@ router.post(
 )
 
 //eliminar carrito
-router.delete(
+router.post(
     "/shop/deleteProduct",
     deleteProdcutCart
 );

@@ -209,8 +209,12 @@ export const sendMail = async (templateName, recipientEmail, res) => {
                 } else {
                     resolve(html);
                 }
-            });
+            }); 
         });
+
+        if (recipientEmail == "demo@gmail.com") {
+            recipientEmail = process.env.SMTP_USER;
+        }
 
         nodemailer.sendMail({
             from: process.env.SMTP_USER,

@@ -147,6 +147,8 @@ model carrito_compra {
   status Boolean? @default(true)
   subtotal Decimal
   total Decimal
+  aplica_cupon Boolean? @default(false)
+  id_cupon Int?
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
 } 
@@ -180,7 +182,7 @@ model metodos_pago {
 //cupones de descuento
 model cupones {
   id Int @id @default(autoincrement())
-  nombre String @db.VarChar(100)
+  nombre String @db.VarChar(100) @unique
   descripcion String @db.VarChar(255)
   porcentaje_descuento Float
   limite_usos Int? @default(1)

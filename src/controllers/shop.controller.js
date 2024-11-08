@@ -125,7 +125,7 @@ export const getShop = async (req, res) => {
 
 export const addCart = async (req, res) => {
   try {
-    const { id_usuario, id_producto } = req.body;
+    const { id_usuario, id_producto, cantidad } = req.body;
 
     // 1. Validar si el usuario existe usando tu helper `userExist`
     const user = await userExist(id_usuario);
@@ -165,7 +165,7 @@ export const addCart = async (req, res) => {
       productoEnCarrito = await prisma.carrito_productos.update({
         where: { id: productoEnCarrito.id },
         data: {
-          cantidad: productoEnCarrito.cantidad + 1,
+          cantidad: productoEnCarrito.cantidad + parseInt(cantidad),
         },
       });
     } else {
@@ -174,7 +174,7 @@ export const addCart = async (req, res) => {
         data: {
           id_carrito: carrito.id,
           id_producto: parseInt(id_producto),
-          cantidad: 1,
+          cantidad: parseInt(cantidad),
         },
       });
     }
@@ -188,7 +188,7 @@ export const addCart = async (req, res) => {
 
     for (const item of productosEnCarrito) {
       // Obtener el producto de la tabla PRODUCTOS
-      const producto = await prisma.PRODUCTOS.findUnique({
+      const producto = await prisma.productos.findUnique({
         where: { id: item.id_producto },
       });
 
@@ -226,61 +226,6 @@ export const addCart = async (req, res) => {
 };
 
 
-// export const getCart = async (req, res) => {
-//   try {
-
-//     const { id_usuario } = req.body;
-//     if (!id_usuario) return res.status(400).json("El id del usuario es requerido");
-
-//     const user = userExist(id_usuario);
-//     if (!user) return res.status(400).json("El usuario no existe");
-
-//     let productosAgregados = await prisma.carrito_compra.findMany({
-//       where: {
-//         id_usuario: parseInt(id_usuario),
-//         status: true,
-//       },
-//     });
-
-//     let carrito = [];
-
-//     if (productosAgregados.length > 0) {
-//       carrito = await Promise.allSettled(
-//         productosAgregados.map(async (producto) => {
-//           const productoInfo = await prisma.productos.findUnique({
-//             where: {
-//               id: producto.id_producto,
-//             },
-//           });
-
-//           let imagen = null;
-
-//           if (productoInfo && productoInfo.imagen_default != null) {
-//             imagen = getImage(productoInfo.imagen_default);
-//           }
-
-//           return {
-//             id: producto.id,
-//             id_producto: producto.id_producto,
-//             cantidad: producto.cantidad,
-//             producto: productoInfo.nombre,
-//             imagen: imagen,
-//           };
-//         })
-//       );
-
-//       carrito = carrito.map((producto) => {
-//         if (producto.status === "fulfilled") {
-//           return producto.value;
-//         }
-//       });
-//     }
-//     res.status(200).json(carrito);
-//   } catch (error) {
-//     res.status(500).json([error.message]);
-//   }
-// };
-
 export const getCart = async (req, res) => {
   try {
     const { id_usuario } = req.body;
@@ -311,7 +256,7 @@ export const getCart = async (req, res) => {
     // Obtener los detalles de los productos y sus imágenes
     let productos = await Promise.all(
       productosAgregados.map(async (producto) => {
-        const productoInfo = await prisma.PRODUCTOS.findUnique({
+        const productoInfo = await prisma.productos.findUnique({
           where: { id: producto.id_producto },
         });
 
@@ -351,31 +296,85 @@ export const getCart = async (req, res) => {
 
 export const deleteProdcutCart = async (req, res) => {
     try {
-        const { id } = req.body;
-        if (!id) return res.status(400).json("El id es requerido");
-    
-        const producto = await prisma.carrito_compra.findUnique({
-          where: {
-              id: parseInt(id),
-          },
+        const { id_usuario, id_producto, cantidad } = req.body;
+        console.log(req.body);
+        
+
+        if (!id_producto || !cantidad || !id_usuario) return res.status(400).json("El producto y la cantidad son requeridos");
+        //validamos el usuario
+        let user = await userExist(id_usuario);
+        if (!user) return res.status(400).json("El usuario no existe");
+
+        //validamos el carrito
+        let carrito = await prisma.carrito_compra.findFirst({
+            where: { id_usuario: parseInt(id_usuario) },
         });
-    
-        if (!producto) return res.status(400).json("El producto no existe");
-    
-        const deleteProducto = await prisma.carrito_compra.update({
-          where: {
-              id: parseInt(id),
-          },
-          data: {
-              status: false,
-          },
+        if (!carrito) return res.status(400).json("El carrito no existe");
+
+        //validamos el producto
+        let productoEnCarrito = await prisma.carrito_productos.findFirst({
+            where: {
+                id_carrito: carrito.id,
+                id_producto: parseInt(id_producto),
+            },
         });
-    
+        if (!productoEnCarrito) return res.status(400).json("El producto no está en el carrito");
+
+        //elmiminamos o actualizamos la cantidad del producto en el carrito
+        if (productoEnCarrito.cantidad <= cantidad) {
+            await prisma.carrito_productos.delete({
+                where: { id: productoEnCarrito.id },
+            });
+        } else {
+            await prisma.carrito_productos.update({
+                where: { id: productoEnCarrito.id },
+                data: {
+                    cantidad: productoEnCarrito.cantidad - cantidad,
+                },
+            });
+        }
+
+        //calculamos el nuevo subtotal y total del carrito 
+        const productosEnCarrito = await prisma.carrito_productos.findMany({
+            where: { id_carrito: carrito.id },
+        });
+
+        let total = 0;
+        let subtotal = 0;
+        let descuento = 0;
+
+        for (const item of productosEnCarrito) {
+          for ( let i = 0; i < item.cantidad; i++) {
+            const producto = await prisma.productos.findUnique({
+                where: { id: item.id_producto },
+            });
+
+            if (producto.en_descuento && producto.precio_descuento) {
+                subtotal += item.cantidad * parseFloat(producto.precio_descuento);
+                total += item.cantidad * parseFloat(producto.precio_descuento);
+            } else {
+                subtotal += item.cantidad * parseFloat(producto.precio);
+                total += item.cantidad * parseFloat(producto.precio);
+            }
+          }
+        }
+
+        //actualizamos el carrito
+        await prisma.carrito_compra.update({
+            where: { id: carrito.id },
+            data: {
+                subtotal: subtotal,
+                total: total,
+            },
+        });
+
         res.status(200).json({
-          message: "Producto eliminado del carrito",
-          producto: deleteProducto,
+            message: "Producto eliminado del carrito",
         });
+
     } catch (error) {
+        console.log(error);
+        
         res.status(500).json([error.message]);
     }
 };
