@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { hashPasswordTest, login, logout, register, verifyToken,sendMail } from "../controllers/auth.controller.js";
 import { validateschema } from "../middlewares/validator.middleware.js";
-import { loginSchema, registerSchema } from "../schemas/auth.schema.js";
+import { loginSchema, registerSchema, } from "../schemas/auth.schema.js";
 
 
 const router = Router();
@@ -14,7 +14,7 @@ router.get("/auth/verify" , verifyToken );
 
 //rutas para pruebas
 router.post("/auth/passwordTest",hashPasswordTest);
-router.get("/auth/sendMail",sendMail);
-
+router.post("/auth/sendmail", async (req, res) => { const { templateName, recipientEmail } = req.body; await sendMail(templateName, recipientEmail, res); res.send("Correo enviado"); });
+  
 
 export default router;
