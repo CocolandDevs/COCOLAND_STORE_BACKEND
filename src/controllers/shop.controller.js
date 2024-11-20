@@ -30,7 +30,7 @@ export const crearPago = async (req,res) => {
 
     if (paymentIntent.status === 'succeeded') {
       // Crear registro de la compra en la tabla compras_usuario
-      const totalAmount = paymentIntent.amount / 100; // Stripe usa centavos
+      const totalAmount = paymentIntent.amount / 100;
       // const compra = await prisma.compras_usuario.create({
       //   data: {
       //     userId,
