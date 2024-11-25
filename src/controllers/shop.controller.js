@@ -5,13 +5,72 @@ import { stripe } from "../libs/stripe.js";
 
 export const intentPayment = async (req, res) => {
   const { amount, userId, products } = req.body;
-
+  console.log(products);
+  
+  let customer;
+  //transformamos el arreglo de productos para que lo muestre en el detalle de stripe
+  let productos = await Promise.all(
+    products.map(async (prod) => {
+      
+      const producto = await prisma.productos.findUnique({
+        where: {
+          id: prod.productId,
+        },
+      });
+       
+      //devolvemos el objeto como lo necesita stripe
+      return {
+        name: producto.nombre,
+        description: producto.descripcion,
+        amount: producto.precio * 100,
+        currency: 'mxn',
+        quantity: prod.quantity,
+      };
+    })
+  );
+  
+  
   try {
-    // Crear Payment Intent en Stripe
+    //si el cliente no esta registrado lo registramos en stripe
+    const usuario = await prisma.usuarios.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!usuario.is_stripe_customer) {
+
+      customer = await stripe.customers.create({
+        email: usuario.email,
+      });
+
+      await prisma.usuarios.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          is_stripe_customer: customer.id,
+        },
+      });
+    }
+    else{
+      customer = await stripe.customers.retrieve(usuario.is_stripe_customer);
+    }
+
+    // Obtener el siguiente número de orden
+    let nextOrder = await prisma.compras_usuario.count() + 1;
+
+    // Crear Payment Intent en Stripe y agregamos los productos
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency: 'mxn',
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'oxxo'],
+      customer: customer.id,
+      metadata: {
+        integration_check: 'accept_a_payment',
+        products: JSON.stringify(products),
+        order: nextOrder,
+      },
     });
 
     res.json({ clientSecret: paymentIntent.client_secret });
@@ -22,34 +81,55 @@ export const intentPayment = async (req, res) => {
 }
 
 export const crearPago = async (req,res) => {
-  const { paymentIntentId, userId, products } = req.body;
+  const {
+    paymentIntentId,
+    userId,
+    products,
+    id_metodo,
+    id_ubicacion,
+    id_cupon,
+    total,
+    subtotal,
+    descuento,
+  } = req.body;
 
   try {
     // Confirmar el Payment Intent en Stripe
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    console.log(paymentIntent);
+
+    //obtenemos el metodo de pago utilizado
+    const metodoPago = await stripe.paymentMethods.retrieve(paymentIntent.payment_method);
+    console.log(metodoPago);
+    
+    
 
     if (paymentIntent.status === 'succeeded') {
       // Crear registro de la compra en la tabla compras_usuario
-      const totalAmount = paymentIntent.amount / 100;
-      // const compra = await prisma.compras_usuario.create({
-      //   data: {
-      //     userId,
-      //     total: totalAmount,
-      //     status: 'completed',
-      //   },
-      // });
+      const compra = await prisma.compras_usuario.create({
+        data:{
+          id_usuario: userId ? parseInt(userId) : null,
+          id_metodo_pago: id_metodo ?? 1,
+          id_ubicacion: id_ubicacion ? parseInt(id_ubicacion) : null,
+          id_cupon: id_cupon ? parseInt(id_cupon) : null,
+          total: total ? parseFloat(parseFloat(total).toFixed(2)) : 0,
+          subtotal: subtotal ? parseFloat(parseFloat(subtotal).toFixed(2)) : 0,
+          descuento: descuento ? parseFloat(parseFloat(descuento).toFixed(2)) : 0,
+          tipo_pago: metodoPago.type,
+          id_stripe_transaccion: paymentIntent.id,
+        }
+      });
 
-      // // Guardar cada producto en la tabla productos_compra
-      // const productosCompra = products.map((product) => ({
-      //   compraId: compra.id,
-      //   productId: product.productId,
-      //   quantity: product.quantity,
-      //   price: product.price,
-      // }));
-
-      // await prisma.productos_compra.createMany({
-      //   data: productosCompra,
-      // });
+      // Crear registro de los productos comprados en la tabla productos_comprados
+      for (const producto of products) {
+        await prisma.productos_compra.create({
+          data: {
+            id_compra: compra.id,
+            id_producto: parseInt(producto.id_producto),
+            cantidad: parseInt(producto.cantidad),
+          },
+        });
+      }
 
       //borrar el carrito
       const carrito = await prisma.carrito_compra.findFirst({
