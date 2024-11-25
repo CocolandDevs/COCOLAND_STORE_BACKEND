@@ -80,12 +80,14 @@ model ubicaciones_usuario {
 model compras_usuario {
   id Int @id @default(autoincrement())
   id_usuario Int
-  id_ubicacion Int
+  id_ubicacion Int?
   id_metodo_pago Int
   id_cupon Int?
+  id_stripe_transaccion String? @db.VarChar(255)
   fecha_compra DateTime @default(now())
   subtotal Decimal
   total Decimal
+  descuento Decimal? @default(0)
   tipo_pago String @db.VarChar(50)
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
@@ -97,7 +99,6 @@ model productos_compra {
   id_compra Int
   id_producto Int
   cantidad Int @default(1)
-  precio Decimal
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
 }
