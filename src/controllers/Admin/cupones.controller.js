@@ -10,11 +10,11 @@ export const getAllCupones = async (req, res) => {
 }
 
 export const getCupon = async (req, res) => {
-    const { id } = req.params;
+    const { name } = req.params;
     try {
-        const cupon = await prisma.cupones.findUnique({
+        const cupon = await prisma.cupones.findFirst({
             where: {
-                id: parseInt(id),
+                nombre: name,
             },
         });
         if (!cupon) return res.status(400).json(["Cupon not found"]);

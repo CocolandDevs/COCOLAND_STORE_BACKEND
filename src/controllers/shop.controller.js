@@ -4,9 +4,9 @@ import { userExist, productoDisponible, carritoExist } from "./helper.controller
 import { stripe } from "../libs/stripe.js";
 
 export const intentPayment = async (req, res) => {
-  const { amount, userId, products } = req.body;
-  console.log(products);
-  
+  const { amount, userId, products,tipoPago } = req.body;
+  //tipoPago es el tipo de pago que se va a realizar, si es oxxo o tarjeta
+
   let customer;
   //transformamos el arreglo de productos para que lo muestre en el detalle de stripe
   let productos = await Promise.all(
@@ -64,19 +64,64 @@ export const intentPayment = async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
       currency: 'mxn',
-      payment_method_types: ['card', 'oxxo'],
+      payment_method_types: [tipoPago],
       customer: customer.id,
       metadata: {
         integration_check: 'accept_a_payment',
-        products: JSON.stringify(products),
+        products: JSON.stringify(productos),
         order: nextOrder,
       },
     });
 
-    res.json({ clientSecret: paymentIntent.client_secret });
+    res.json({ clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id });
   } catch (error) {
     console.error('Error creating payment intent:', error);
     res.status(500).json({ error: 'Payment failed' });
+  }
+}
+export const guardarTarjeta = async (req,res) => {
+  const { userId, paymentIntentId } = req.body;
+  try {
+    const usuario = await prisma.usuarios.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!usuario.is_stripe_customer) {
+      const customer = await stripe.customers.create({
+        email: usuario.email,
+      });
+
+      await prisma.usuarios.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          is_stripe_customer: customer.id,
+        },
+      });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    
+    const paymentMethod = paymentIntent.payment_method;
+    // Attach the payment method to the customer
+    await stripe.paymentMethods.attach(paymentMethod, {
+      customer: usuario.is_stripe_customer,
+    });
+
+    // Set the payment method as the default
+    await stripe.customers.update(usuario.is_stripe_customer, {
+      invoice_settings: {
+        default_payment_method: paymentMethod,
+      },
+    });
+
+    res.json({ success: true, message: 'Payment method saved' });
+  } catch (error) {
+    console.error('Error saving payment method:', error);
+    res.status(500).json({ error: 'Payment method not saved' });
   }
 }
 
@@ -91,12 +136,13 @@ export const crearPago = async (req,res) => {
     total,
     subtotal,
     descuento,
+    isCarrito,
   } = req.body;
+  
 
   try {
     // Confirmar el Payment Intent en Stripe
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    console.log(paymentIntent);
 
     //obtenemos el metodo de pago utilizado
     const metodoPago = await stripe.paymentMethods.retrieve(paymentIntent.payment_method);
@@ -131,35 +177,37 @@ export const crearPago = async (req,res) => {
         });
       }
 
-      //borrar el carrito
-      const carrito = await prisma.carrito_compra.findFirst({
-        where: {
-          id_usuario: userId,
-        },
-      });
-
-      const productosEnCarrito = await prisma.carrito_productos.findMany({
-        where: {
-          id_carrito: carrito.id,
-        },
-      });
-
-      for (const item of productosEnCarrito) {
-        await prisma.carrito_productos.delete({
-          where: { id: item.id },
+      if(isCarrito){
+        //borrar el carrito
+        const carrito = await prisma.carrito_compra.findFirst({
+          where: {
+            id_usuario: userId,
+          },
+        });
+  
+        const productosEnCarrito = await prisma.carrito_productos.findMany({
+          where: {
+            id_carrito: carrito.id,
+          },
+        });
+  
+        for (const item of productosEnCarrito) {
+          await prisma.carrito_productos.delete({
+            where: { id: item.id },
+          });
+        }
+  
+        await prisma.carrito_compra.update({
+          where: { id: carrito.id },
+          data: {
+            subtotal: 0,
+            total: 0,
+            descuento: 0,
+            aplica_cupon: false,
+            id_cupon: null,
+          },
         });
       }
-
-      await prisma.carrito_compra.update({
-        where: { id: carrito.id },
-        data: {
-          subtotal: 0,
-          total: 0,
-          descuento: 0,
-          aplica_cupon: false,
-          id_cupon: null,
-        },
-      });
 
       res.json({ success: true, message: 'Purchase confirmed and recorded.' });
     } else {
@@ -226,37 +274,6 @@ export const getShop = async (req, res) => {
     res.status(500).json([error.message]);
   }
 };
-
-// export const addCart = async (req, res) => {
-//   try {
-//     const { id_usuario } = req.body;
-//     //validamos queel usuario y el producto estén disponibles
-//     const user = await userExist(id_usuario);
-
-//     //const { estatus, producto, message } = await productoDisponible(id_producto);
-
-//     if (!user) return res.status(400).json("El usuario no existe");
-//     if (!estatus) return res.status(400).json(message);
-
-    
-    
-//     const carrito = await prisma.carrito_compra.create({
-//       data: {
-//         id_usuario: parseInt(id_usuario),
-//         status: ,
-//         subtotal: parseInt(cantidad),
-//         total:
-//       },
-//     });
-
-//     res.status(200).json({
-//       message: "Producto agregado al carrito",
-//       producto: producto,
-//     });
-//   } catch (error) {
-//     res.status(500).json([error.message]);
-//   }
-// };
 
 export const addCart = async (req, res) => {
   try {

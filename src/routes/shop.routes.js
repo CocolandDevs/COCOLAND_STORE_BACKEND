@@ -8,6 +8,7 @@ import {
   getShop,
   intentPayment,
   crearPago,
+  guardarTarjeta,
 } from "../controllers/shop.controller.js";
 
 const router = Router();
@@ -17,7 +18,12 @@ router.post(
     "/payment/create-payment-intent",
     intentPayment
 );
-
+//guardar la tarjeta
+router.post(
+    "/payment/save-card",
+    guardarTarjeta
+)
+//confirmar la compra
 router.post(
     "/payment/create-payment",
     crearPago

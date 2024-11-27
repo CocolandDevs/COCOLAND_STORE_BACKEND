@@ -21,8 +21,7 @@ router.get(
 );
 
 router.get(
-  "/cupones/get/:id",
-  authRequired,
+  "/cupones/get/:name",
   getCupon
 );
 
