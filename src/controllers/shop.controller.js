@@ -221,57 +221,61 @@ export const crearPago = async (req,res) => {
 
 export const getShop = async (req, res) => {
   try {
-    // console.log("el body es ",req.body);
     const { id_usuario } = req.body;
-    if (!id_usuario)
-      return res.status(400).json("el id del usuario es requerido");
+    if (!id_usuario) {
+      return res.status(400).json("El id del usuario es requerido");
+    }
 
-    const shop = await prisma.compras_usuario.findMany({
+    const compras = await prisma.compras_usuario.findMany({
       where: {
         id_usuario: parseInt(id_usuario),
       },
     });
-    let compras = [];
-    if (shop.length > 0) {
-      compras = await Promise.allSettled(
-        shop.map(async (compra) => {
-          const producto = await prisma.productos.findUnique({
-            where: {
-              id: compra.id_producto,
-            },
-          });
-          let imagen = null;
-          if (producto && producto.imagen_default != null) {
-            imagen = getImage(producto.imagen_default);
-          }
-          const ubicacion = await prisma.ubicaciones_usuario.findUnique({
-            where: {
-              id: compra.id_ubicacion,
-            },
-          });
-          return {
-            id: compra.id,
-            id_usuario: compra.id_usuario,
-            cantidad: compra.cantidad,
-            fecha_compra: compra.fecha_compra,
-            tipo_pago: compra.tipo_pago,
-            producto: producto.nombre,
-            ubicacion: ubicacion?.alias,
-            imagen: imagen,
-          };
-        })
-      );
 
-      compras = compras.map((compra) => {
-        if (compra.status === "fulfilled") {
-          return compra.value;
-        }
+    let resultado = [];
+
+    for (const compra of compras) {
+      const productosCompra = await prisma.productos_compra.findMany({
+        where: {
+          id_compra: compra.id,
+        },
+      });
+
+      const productosConInfo = await Promise.all(productosCompra.map(async (productoCompra) => {
+        const producto = await prisma.productos.findUnique({
+          where: {
+            id: productoCompra.id_producto,
+          },
+        });
+
+        const categoria = producto ? await prisma.categorias.findUnique({
+          where: {
+            id: producto.id_categoria,
+          },
+        }) : null;
+
+        return {
+          id_producto: producto.id,
+          cantidad: productoCompra.cantidad,
+          nombre_producto: producto.nombre,
+          categoria: categoria ? categoria.nombre : null,
+          imagen: producto.imagen_default ? getImage(producto.imagen_default) : null,
+        };
+      }));
+
+      resultado.push({
+        id_compra: compra.id,
+        fecha_compra: compra.fecha_compra,
+        productos: productosConInfo,
       });
     }
-    // console.log(compras);
-    res.status(200).json(compras);
+
+    res.status(200).json(resultado);
   } catch (error) {
+    console.error('Error obteniendo los productos comprados:', error);
     res.status(500).json([error.message]);
+  } finally {
+    await prisma.$disconnect();
   }
 };
 
