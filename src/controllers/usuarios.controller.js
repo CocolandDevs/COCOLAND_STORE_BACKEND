@@ -357,6 +357,13 @@ export const getPerfil = async (req, res) => {
 
     if (!perfil) return res.json(["Perfil no encontrado"]);
 
+    //obtenemos la imagen del perfil
+    let imagen = perfil.imagen;
+    if (imagen != null) {
+      const base64 = getImage(imagen);
+      perfil.imagen = base64;
+    }
+    
     res.json(perfil);
   } catch (error) {
     // console.log(error);
