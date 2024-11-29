@@ -9,28 +9,26 @@ export const intentPayment = async (req, res) => {
 
   let customer;
   //transformamos el arreglo de productos para que lo muestre en el detalle de stripe
-  let productos = await Promise.all(
-    products.map(async (prod) => {
-      
-      const producto = await prisma.productos.findUnique({
-        where: {
-          id: prod.productId,
-        },
-      });
-       
-      //devolvemos el objeto como lo necesita stripe
-      return {
-        name: producto.nombre,
-        description: producto.descripcion,
-        amount: producto.precio * 100,
-        currency: 'mxn',
-        quantity: prod.quantity,
-      };
-    })
-  );
-  
-  
   try {
+    let productos = await Promise.all(
+      products.map(async (prod) => {
+        
+        const producto = await prisma.productos.findUnique({
+          where: {
+            id: prod.productId,
+          },
+        });
+         
+        //devolvemos el objeto como lo necesita stripe
+        return {
+          name: producto.nombre,
+          description: producto.descripcion,
+          amount: producto.precio * 100,
+          currency: 'mxn',
+          quantity: prod.quantity,
+        };
+      })
+    );
     //si el cliente no esta registrado lo registramos en stripe
     const usuario = await prisma.usuarios.findUnique({
       where: {
