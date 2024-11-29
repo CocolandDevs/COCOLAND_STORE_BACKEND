@@ -2,6 +2,7 @@ import prisma from "../libs/client.js";
 import { getImage } from "./helper.controller.js";
 import { userExist, productoDisponible, carritoExist } from "./helper.controller.js";
 import { stripe } from "../libs/stripe.js";
+import { sendMail } from "./auth.controller.js";
 
 export const intentPayment = async (req, res) => {
   const { amount, userId, products,tipoPago } = req.body;
@@ -148,7 +149,7 @@ export const crearPago = async (req,res) => {
     
     
 
-    if (paymentIntent.status === 'succeeded') {
+    if (paymentIntent.status === 'succeeded' || paymentIntent.status === 'requires_action') {
       // Crear registro de la compra en la tabla compras_usuario
       const compra = await prisma.compras_usuario.create({
         data:{
@@ -161,6 +162,7 @@ export const crearPago = async (req,res) => {
           descuento: descuento ? parseFloat(parseFloat(descuento).toFixed(2)) : 0,
           tipo_pago: metodoPago.type,
           id_stripe_transaccion: paymentIntent.id,
+          status_transaccion: paymentIntent.status,
         }
       });
 
@@ -207,6 +209,15 @@ export const crearPago = async (req,res) => {
         });
       }
 
+      const usuario = await prisma.usuarios.findUnique({
+        where: {
+          id: parseInt(userId),
+        },
+      });
+
+      //mandamos el correo
+      await sendMail('compra',usuario.email,res)
+
       res.json({ success: true, message: 'Purchase confirmed and recorded.' });
     } else {
       res.status(400).json({ error: 'Payment not confirmed.' });
@@ -214,6 +225,71 @@ export const crearPago = async (req,res) => {
   } catch (error) {
     console.error('Error confirming purchase:', error);
     res.status(500).json({ error: 'Purchase confirmation failed' });
+  }
+}
+
+// este es el webhook
+export const confirmarPagoOxxo = async (req,res) => {
+  try {
+    const sig = req.headers['stripe-signature'];
+    const event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+
+    if (event.type == 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object;
+      
+      //buscamos la compra confirmada y la actualizamos
+      const compra = await prisma.compras_usuario.findFirst({
+        where: {
+          id_stripe_transaccion: paymentIntent.id,
+        },
+      });
+
+      if (compra) {
+        await prisma.compras_usuario.update({
+          where: {
+            id: compra.id,
+          },
+          data: {
+            status_transaccion: paymentIntent.status,
+          },
+        });
+
+        //enviamos un correo al usuario con los detalles de la compra
+        //enviamos un correo al administrador con los detalles de la compra
+        res.json({ success: true, message: 'Purchase confirmed and recorded.' });
+      } else {
+        res.status(400).json({ error: 'Purchase not found.' });
+      }
+    } else if(event.type == 'payment_intent.payment_failed') {
+      const paymentIntent = event.data.object;
+      
+      //buscamos la compra confirmada y la actualizamos
+      const compra = await prisma.compras_usuario.findFirst({
+        where: {
+          id_stripe_transaccion: paymentIntent.id,
+        },
+      });
+
+      if (compra) {
+        await prisma.compras_usuario.update({
+          where: {
+            id: compra.id,
+          },
+          data: {
+            status_transaccion: paymentIntent.status,
+          },
+        });
+
+        //enviamos un correo al usuario con los detalles de la compra
+        //enviamos un correo al administrador con los detalles de la compra
+        res.json({ success: true, message: 'Purchase confirmed and recorded.' });
+      } else {
+        res.status(400).json({ error: 'Purchase not found.' });
+      }
+
+    }
+  } catch (error) {
+    res.status(400).send(`Webhook Error: ${error.message}`);
   }
 }
 
@@ -227,6 +303,7 @@ export const getShop = async (req, res) => {
     const compras = await prisma.compras_usuario.findMany({
       where: {
         id_usuario: parseInt(id_usuario),
+        status_transaccion: 'succeeded',
       },
     });
 

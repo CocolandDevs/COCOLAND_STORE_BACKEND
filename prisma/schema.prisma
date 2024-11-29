@@ -83,6 +83,7 @@ model compras_usuario {
   id_ubicacion Int?
   id_metodo_pago Int
   id_cupon Int?
+  status_transaccion String? @db.VarChar(50)
   id_stripe_transaccion String? @db.VarChar(255)
   fecha_compra DateTime @default(now())
   subtotal Decimal

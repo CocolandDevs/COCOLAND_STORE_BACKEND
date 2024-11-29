@@ -9,6 +9,7 @@ import {
   intentPayment,
   crearPago,
   guardarTarjeta,
+  confirmarPagoOxxo,
 } from "../controllers/shop.controller.js";
 
 const router = Router();
@@ -27,6 +28,12 @@ router.post(
 router.post(
     "/payment/create-payment",
     crearPago
+)
+
+//confirmas compras tardias
+router.post(
+    "/payment/webhok",
+    confirmarPagoOxxo
 )
 
 //historial de compras
