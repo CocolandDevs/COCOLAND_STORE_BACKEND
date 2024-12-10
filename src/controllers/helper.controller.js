@@ -48,12 +48,13 @@ export const guardarImagen = async (file, modulo) => {
         if (!fs.existsSync(`${STORE_PATH}/${modulo}`)) {
             fs.mkdirSync(`${STORE_PATH}/${modulo}`, { recursive: true });
         }
+        
         fs.renameSync(file.path, newPath);
       
         // Devolvemos el directorio donde se guardó la imagen
         return `${STORE_PATH}/${modulo}/${nombreArchivo}`;
     } catch (error) {
-        // console.log(error.message);
+        console.log(error.message);
         return null;
     }
 }
