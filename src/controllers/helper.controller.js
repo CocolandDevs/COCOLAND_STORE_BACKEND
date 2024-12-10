@@ -1,5 +1,7 @@
 import prisma from "../libs/client.js"
 import fs from "fs";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
 export const getRolByUser = async (user) => {
     try {
@@ -23,11 +25,12 @@ export const getRolByUser = async (user) => {
 }
 
 /**
- *  @param file Archivo de imagen;
+ * @param file Archivo de imagen;
  * @param modulo Nombre del módulo donde se guardará la imagen;
  */
 export const guardarImagen = async (file, modulo) => {
     try {
+        const STORE_PATH = '/storage/public/data';
         // Generamos un token único para la imagen
         const token = Math.random().toString(36).substring(2);
 
@@ -36,17 +39,19 @@ export const guardarImagen = async (file, modulo) => {
         const nombreArchivo = `${token}.${extension}`;
         
         file.name = nombreArchivo;
+        //obtenemos el path donde se guardará la imagen
+
         
-        const newPath = `./public/${modulo}/${nombreArchivo}`;
+        const newPath = `${STORE_PATH}/${modulo}/${nombreArchivo}`;
 
         //creamos el directorio si no existe
-        if (!fs.existsSync(`./public/${modulo}`)) {
-            fs.mkdirSync(`./public/${modulo}`, { recursive: true });
+        if (!fs.existsSync(`${STORE_PATH}/${modulo}`)) {
+            fs.mkdirSync(`${STORE_PATH}/${modulo}`, { recursive: true });
         }
         fs.renameSync(file.path, newPath);
       
         // Devolvemos el directorio donde se guardó la imagen
-        return `/public/${modulo}/${nombreArchivo}`;
+        return `${STORE_PATH}/${modulo}/${nombreArchivo}`;
     } catch (error) {
         // console.log(error.message);
         return null;
@@ -114,7 +119,7 @@ export const productoDisponible = async (id) => {
 
 export const getImage = (path) => {
     try {
-        const image = fs.readFileSync('.' + path,{encoding: 'base64'});
+        const image = fs.readFileSync( path,{encoding: 'base64'});
         let pathSplit = path.split('/');
         let name = pathSplit[pathSplit.length - 1];
         let extension = name.split('.')[1];
