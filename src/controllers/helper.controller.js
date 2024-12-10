@@ -28,36 +28,69 @@ export const getRolByUser = async (user) => {
  * @param file Archivo de imagen;
  * @param modulo Nombre del módulo donde se guardará la imagen;
  */
+// export const guardarImagen = async (file, modulo) => {
+//     try {
+//         const STORE_PATH = '/storage/public/data';
+//         // Generamos un token único para la imagen
+//         const token = Math.random().toString(36).substring(2);
+
+//         // Renombramos la imagen con ese token
+//         const extension = file?.type.split('/').pop();
+//         const nombreArchivo = `${token}.${extension}`;
+        
+//         file.name = nombreArchivo;
+//         //obtenemos el path donde se guardará la imagen
+
+        
+//         const newPath = `${STORE_PATH}/${modulo}/${nombreArchivo}`;
+
+//         //creamos el directorio si no existe
+//         if (!fs.existsSync(`${STORE_PATH}/${modulo}`)) {
+//             fs.mkdirSync(`${STORE_PATH}/${modulo}`, { recursive: true });
+//         }
+        
+//         fs.renameSync(file.path, newPath);
+      
+//         // Devolvemos el directorio donde se guardó la imagen
+//         return `${STORE_PATH}/${modulo}/${nombreArchivo}`;
+//     } catch (error) {
+//         console.log(error.message);
+//         return null;
+//     }
+// }
+
 export const guardarImagen = async (file, modulo) => {
     try {
         const STORE_PATH = '/storage/public/data';
         // Generamos un token único para la imagen
         const token = Math.random().toString(36).substring(2);
 
-        // Renombramos la imagen con ese token
+        // Obtenemos la extensión del archivo
         const extension = file?.type.split('/').pop();
         const nombreArchivo = `${token}.${extension}`;
-        
-        file.name = nombreArchivo;
-        //obtenemos el path donde se guardará la imagen
 
-        
-        const newPath = `${STORE_PATH}/${modulo}/${nombreArchivo}`;
+        // Obtenemos el path donde se guardará la imagen
+        const directorioModulo = path.join(STORE_PATH, modulo);
+        const newPath = path.join(directorioModulo, nombreArchivo);
 
-        //creamos el directorio si no existe
-        if (!fs.existsSync(`${STORE_PATH}/${modulo}`)) {
-            fs.mkdirSync(`${STORE_PATH}/${modulo}`, { recursive: true });
+        // Creamos el directorio si no existe
+        if (!fs.existsSync(directorioModulo)) {
+            fs.mkdirSync(directorioModulo, { recursive: true });
         }
-        
-        fs.renameSync(file.path, newPath);
-      
-        // Devolvemos el directorio donde se guardó la imagen
-        return `${STORE_PATH}/${modulo}/${nombreArchivo}`;
+
+        // Copiamos el archivo al destino
+        await fs.promises.copyFile(file.path, newPath);
+
+        // Eliminamos el archivo original
+        await fs.promises.unlink(file.path);
+
+        // Devolvemos el path del archivo guardado
+        return newPath;
     } catch (error) {
-        console.log(error.message);
+        console.error('Error al guardar la imagen:', error.message);
         return null;
     }
-}
+};
 
 export const userExist = async (id) => {
     try {
