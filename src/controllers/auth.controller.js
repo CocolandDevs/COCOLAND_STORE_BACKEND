@@ -189,10 +189,15 @@ export const sendMail = async (templateName, recipientEmail, res) => {
             images.push(obj);
         });
 
+        //verificamos si existen las imagens o el directorio
+        images = images.filter((imagen) => {
+            return fs.existsSync(imagen.imagen_default);
+        });
+
         const imagesAttachments = images.map((imagen) => {
             return {
                 filename: imagen.nombre,
-                content: fs.createReadStream(path.join(path.resolve(), imagen.imagen_default)),
+                content: fs.createReadStream(imagen.imagen_default),
                 nombreProducto: imagen.nombre,
                 precio: imagen.precio,
                 descripcion: imagen.descripcion,
